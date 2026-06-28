@@ -2328,7 +2328,7 @@ pref("dom.debug.propagate_gesture_events_through_content", false);
 pref("browser.uiCustomization.debug", false);
 
 // CustomizableUI state of the browser's user interface
-pref("browser.uiCustomization.state", "");
+pref("browser.uiCustomization.state", "{\"placements\":{\"nav-bar\":[\"sidebar-button\",\"back-button\",\"forward-button\",\"stop-reload-button\",\"home-button\",\"spring\",\"urlbar-container\",\"spring\",\"downloads-button\",\"fxa-toolbar-menu-button\"]},\"seen\":[],\"dirtyAreaCache\":[\"nav-bar\"],\"currentVersion\":20,\"newElementCount\":0}");
 
 // If set to false, FxAccounts and Sync will be unavailable.
 // A restart is mandatory after flipping that preference.
