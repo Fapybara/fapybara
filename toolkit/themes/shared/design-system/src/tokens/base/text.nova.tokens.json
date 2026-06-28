@@ -1,0 +1,39 @@
+{
+  "color": {
+    "@base": {
+      "value": {
+        "prefersContrast": "CanvasText",
+        "brand": {
+          "light": "{color.violet-desaturated.90}",
+          "dark": "{color.violet-desaturated.0}"
+        },
+        "platform": {
+          "default": "currentColor"
+        }
+      }
+    },
+    "error": {
+      "value": {
+        "light": "{color.red.50}",
+        "dark": "{color.red.20}",
+        "prefersContrast": "inherit"
+      }
+    },
+    "accent": {
+      "primary": {
+        "selected": {
+          "value": {
+            "forcedColors": "SelectedItemText",
+            "brand": {
+              "light": "{color.white.@base}",
+              "dark": "{color.gray.55}"
+            },
+            "platform": {
+              "default": "SelectedItemText"
+            }
+          }
+        }
+      }
+    }
+  }
+}

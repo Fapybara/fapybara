@@ -1,0 +1,42 @@
+{
+  "manifest_version": 2,
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "default-theme@mozilla.org"
+    }
+  },
+  "name": "System theme \u2014 auto",
+  "description": "Follow the operating system setting for buttons, menus, and windows.",
+  "author": "Mozilla",
+  "version": "1.4.2",
+  "icons": {
+    "32": "icon.svg"
+  },
+  "theme": {
+    "images": {
+      "additional_backgrounds": [
+        "images/0.png"
+      ]
+    },
+    "properties": {
+      "additional_backgrounds_alignment": [
+        "right top"
+      ],
+      "additional_backgrounds_tiling": [
+        "no-repeat"
+      ]
+    },
+    "colors": {
+      "toolbar": "rgb(41, 54, 84)",
+      "toolbar_text": "rgb(186, 157, 90)",
+      "frame": "rgb(49, 65, 101)",
+      "tab_background_text": "rgb(186, 157, 90)",
+      "toolbar_field": "rgb(49, 65, 101)",
+      "toolbar_field_text": "rgb(186, 157, 90)",
+      "tab_line": "rgb(186, 157, 90)",
+      "popup": "rgb(49, 65, 101)",
+      "popup_text": "rgb(186, 157, 90)",
+      "tab_loading": "rgb(186, 157, 90)"
+    }
+  }
+}
