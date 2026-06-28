@@ -616,6 +616,7 @@ def main(args=None):
         if options.l10n_src:
             p.error("both l10n-src and l10n-base are not supported")
         jm.l10nbase = options.l10n_base
+    if options.relativesrcdir:
         jm.relativesrcdir = options.relativesrcdir
     jm.localedirs = options.l10n_src
     if options.root_manifest_entry_appid:
