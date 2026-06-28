@@ -55,6 +55,8 @@ BRANDING_FILES = \
 	wizWatermark.bmp \
 	$(NULL)
 
+REAL_LOCALE_MERGEDIR ?= $(if $(wildcard $(topobjdir)/browser/locales/merge-dir/$(AB_CD)),$(topobjdir)/browser/locales/merge-dir/$(AB_CD),$(L10NBASEDIR)/$(AB_CD))
+
 include $(topsrcdir)/config/config.mk
 
 ifdef IS_LANGUAGE_REPACK
