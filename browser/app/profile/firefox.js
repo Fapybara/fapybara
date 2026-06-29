@@ -22,6 +22,8 @@
   pref("browser.hiddenWindowChromeURL", "chrome://browser/content/hiddenWindowMac.xhtml");
 #endif
 
+pref("intl.locale.requested", "pt-BR");
+
 // Set add-ons abuse report related prefs specific to Firefox Desktop.
 pref("extensions.abuseReport.enabled", true);
 
