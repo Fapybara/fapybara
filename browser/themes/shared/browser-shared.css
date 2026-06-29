@@ -172,23 +172,23 @@ body {
   }
 
   @media -moz-pref("browser.nova.enabled") {
-    --chrome-window-gap: 4px;
-    --chrome-block-radius: 10px;
+    --chrome-window-gap: 0px;
+    --chrome-block-radius: 0px;
 
     @media (-moz-platform: linux) {
-      --chrome-block-radius: env(-moz-gtk-csd-titlebar-radius);
+      --chrome-block-radius: 0px;
     }
 
     @media (-moz-platform: windows) {
-      --chrome-block-radius: 4px;
+      --chrome-block-radius: 0px;
     }
 
     @media (-moz-windows-mica) {
-      --chrome-block-radius: 8px;
+      --chrome-block-radius: 0px;
     }
 
     @media (-moz-mac-tahoe-theme) {
-      --chrome-block-radius: 16px;
+      --chrome-block-radius: 0px;
     }
   }
 }
@@ -304,7 +304,7 @@ body {
     /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
     border-radius: var(--chrome-block-radius);
     /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
-    border: 1px solid var(--chrome-content-separator-color);
+    border: none;
     overflow: clip;
 
     &:-moz-window-inactive {
