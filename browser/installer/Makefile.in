@@ -153,3 +153,6 @@ package-compare::
 ifdef ENABLE_WEBDRIVER
 DEFINES += -DENABLE_WEBDRIVER=1
 endif
+
+# Ensure the package step uses the active UI locale instead of defaulting to en-US
+ALL_LOCALES = $(AB_CD)
