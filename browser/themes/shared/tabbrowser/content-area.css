@@ -106,9 +106,6 @@
 /* Needed to ensure #sidebar-wrapper is full height when vertical tabs are not enabled */
 #browser {
   position: relative;
-  background-image: url("chrome://branding/content/background.png") !important;
-  background-size: cover !important;
-  background-position: center !important;
 }
 
 #browser,
@@ -159,10 +156,22 @@
 
   @media -moz-pref("sidebar.revamp") and -moz-pref("sidebar.revamp.round-content-area") {
     overflow: clip;
-    margin: 8px 8px 8px 0 !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
-    outline: 1px solid var(--sidebar-border-color) !important;
+
+    @media not -moz-pref("browser.nova.enabled") {
+      :root:not([inDOMFullscreen]) #tabbrowser-tabbox[sidebar-shown] & {
+        @media -moz-pref("sidebar.position_start") {
+          border-start-start-radius: var(--border-radius-medium);
+        }
+        @media not -moz-pref("sidebar.position_start") {
+          border-start-end-radius: var(--border-radius-medium);
+        }
+      }
+
+      :root[ai-window]:not([inDOMFullscreen]) & {
+        border-start-start-radius: var(--border-radius-medium);
+        border-start-end-radius: var(--border-radius-medium);
+      }
+    }
   }
 }
 
@@ -501,6 +510,7 @@ split-view-footer {
 
 /* Content popups */
 
+#clipboardReadPasteMenuPopup,
 #contentAreaContextMenu,
 #DateTimePickerPanel,
 #remoteBrowserTooltip,

@@ -172,23 +172,23 @@ body {
   }
 
   @media -moz-pref("browser.nova.enabled") {
-    --chrome-window-gap: 0px;
-    --chrome-block-radius: 0px;
+    --chrome-window-gap: 4px;
+    --chrome-block-radius: 10px;
 
     @media (-moz-platform: linux) {
-      --chrome-block-radius: 0px;
+      --chrome-block-radius: env(-moz-gtk-csd-titlebar-radius);
     }
 
     @media (-moz-platform: windows) {
-      --chrome-block-radius: 0px;
+      --chrome-block-radius: 4px;
     }
 
     @media (-moz-windows-mica) {
-      --chrome-block-radius: 0px;
+      --chrome-block-radius: 8px;
     }
 
     @media (-moz-mac-tahoe-theme) {
-      --chrome-block-radius: 0px;
+      --chrome-block-radius: 16px;
     }
   }
 }
@@ -304,7 +304,7 @@ body {
     /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
     border-radius: var(--chrome-block-radius);
     /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
-    border: none;
+    border: 1px solid var(--chrome-content-separator-color);
     overflow: clip;
 
     &:-moz-window-inactive {
@@ -1559,7 +1559,10 @@ popupnotificationcontent {
         --toolbarbutton-background-color-hover: var(--background-color-box);
         --toolbarbutton-background-color-active: var(--background-color-box);
         --toolbarbutton-outline-color-hover: var(--smart-window-toolbarbutton-color);
-        --toolbarbutton-outline-color-active: var(--smart-window-toolbarbutton-color);
+        --toolbarbutton-outline-color-active: light-dark(
+          color-mix(in srgb, var(--color-violet-desaturated-50) 30%, transparent),
+          var(--color-violet-desaturated-50)
+        );
         --toolbarbutton-outline-color-selected: var(--smart-window-toolbarbutton-color);
       }
     }
@@ -1568,9 +1571,14 @@ popupnotificationcontent {
 
 #ai-window-switch-classic,
 #ai-window-switch-ai {
-  &:hover {
-    background-color: var(--button-background-color-ghost-hover);
-  }
+  --button-background-color-ghost-active: light-dark(
+    color-mix(in srgb, var(--color-violet-desaturated-60) 30%, transparent),
+    color-mix(in srgb, var(--color-violet-desaturated-40) 36%, transparent)
+  );
+  --button-background-color-ghost-hover: light-dark(
+    color-mix(in srgb, var(--color-violet-desaturated-60) 16%, transparent),
+    color-mix(in srgb, var(--color-violet-desaturated-40) 24%, transparent)
+  );
 
   .toolbarbutton-icon {
     margin-inline-end: var(--space-small);
@@ -1600,11 +1608,7 @@ popupnotificationcontent {
   @media -moz-pref("browser.nova.enabled") {
     /* TODO: replace with token when available - Bug 2033070 */
     /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
-    border-radius: 24px;
-
-    &[checked] {
-      background-color: var(--button-background-color-active);
-    }
+    border-radius: 12px;
 
     #ai-window-switch-ai-badge {
       display: none;

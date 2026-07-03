@@ -279,12 +279,8 @@ sidebar-main,
   /* Prevent overflow during sidebar animation when the sidebar is reordered */
   overflow: clip;
 
-  @media -moz-pref("sidebar.revamp") {
-    margin: 8px 0 8px 8px !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
-    outline: 1px solid var(--sidebar-border-color) !important;
-    background-color: var(--sidebar-background-color) !important;
+  &[sidebar-ongoing-animations] > sidebar-main::part(overflow-button) {
+    display: none;
   }
 }
 
