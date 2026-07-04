@@ -238,8 +238,8 @@ export default class SidebarMain extends MozLitElement {
 
   createCopyButton(view) {
     let newButtonAction;
-    if (view === "viewCustomizeSidebar") {
-      newButtonAction = this.bottomActions[0];
+    if (view === "viewCustomizeSidebar" || view === "viewThemeMixer") {
+      newButtonAction = this.bottomActions.find(a => a.view === view);
     } else {
       newButtonAction = this.getToolsAndExtensions().get(view);
     }
@@ -498,13 +498,22 @@ export default class SidebarMain extends MozLitElement {
   setCustomize() {
     const view = "viewCustomizeSidebar";
     const customizeSidebar = window.SidebarController.sidebars.get(view);
-    this.bottomActions = [
-      {
+    const themeMixer = window.SidebarController.sidebars.get("viewThemeMixer");
+    this.bottomActions = [];
+    if (themeMixer) {
+      this.bottomActions.push({
+        tooltiptext: "Theme Mixer",
+        iconUrl: themeMixer.iconUrl,
+        view: "viewThemeMixer",
+      });
+    }
+    if (customizeSidebar) {
+      this.bottomActions.push({
         l10nId: customizeSidebar.revampL10nId,
         iconUrl: customizeSidebar.iconUrl,
         view,
-      },
-    ];
+      });
+    }
   }
 
   async handleEvent(e) {

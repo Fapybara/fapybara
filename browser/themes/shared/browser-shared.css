@@ -43,6 +43,12 @@ body {
 }
 
 :root {
+  --fapybara-sidebar-bg: #181818;
+  --fapybara-accent-color: #d4af37;
+  --fapybara-text-color: #ffffff;
+  --fapybara-border-radius: 0px;
+  --fapybara-gradient-bg: linear-gradient(90deg, #181818 0%, #d4af37 100%);
+
   --window-min-width: 500px;
   /* Vertical tabs need extra room in the nav bar for window controls,
      drag space, and the sidebar button. */

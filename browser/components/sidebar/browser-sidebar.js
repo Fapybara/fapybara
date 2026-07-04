@@ -255,6 +255,12 @@ var SidebarController = {
     }
 
     if (this.sidebarRevampEnabled) {
+      this._sidebars.set("viewThemeMixer", {
+        url: "chrome://branding/content/theme-mixer.html",
+        name: "Theme Mixer",
+        tooltiptext: "Theme Mixer",
+        iconUrl: "chrome://global/skin/icons/color-picker-20.svg",
+      });
       this._sidebars.set("viewCustomizeSidebar", {
         url: "chrome://browser/content/sidebar/sidebar-customize.html",
         revampL10nId: "sidebar-menu-customize-label",

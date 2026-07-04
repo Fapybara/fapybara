@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fapybara Theme Mixer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #121212;
+      --card-bg: rgba(30, 30, 30, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-color: #d4af37;
+      --text-color: #ffffff;
+      --text-dim: #a0a0a0;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: calc(100vh - 48px);
+      user-select: none;
+    }
+
+    .container {
+      width: 320px;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 0;
+      background: linear-gradient(135deg, #fff 40%, var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin: 0;
+    }
+
+    .gradient-canvas {
+      width: 100%;
+      height: 120px;
+      border-radius: 14px;
+      position: relative;
+      background: linear-gradient(90deg, #181818, var(--accent-color));
+      border: 1px solid var(--border-color);
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+      overflow: visible;
+      cursor: crosshair;
+    }
+
+    .color-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 3px solid #ffffff;
+      position: absolute;
+      top: 50%;
+      cursor: grab;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.3);
+      transition: border-color 0.2s, transform 0.1s;
+    }
+
+    .color-dot.active {
+      border-color: #d4af37;
+      transform: translate(-50%, -50%) scale(1.15);
+      z-index: 10;
+    }
+
+    .color-dot:active {
+      cursor: grabbing;
+    }
+
+    .mixer-controls {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .control-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .control-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: scale(1.05);
+    }
+
+    .control-btn:active {
+      transform: scale(0.95);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .palette-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      overflow-x: auto;
+      padding-block: 4px;
+    }
+
+    .palette-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      transition: transform 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .palette-color:hover {
+      transform: scale(1.15);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .palette-color.active {
+      border-color: #ffffff;
+      transform: scale(1.15);
+    }
+
+    .sliders-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .slider-value {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: rgba(255,255,255,0.1);
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: var(--accent-color);
+      transform: scale(1.15);
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent-color), #f39c12);
+      color: #000;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .action-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .action-btn:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="chrome://branding/content/about-logo.png" class="logo" alt="Fapybara">
+      <h1 class="title">Theme Mixer</h1>
+      <p class="subtitle">Customize Fapybara's sidebar gradient</p>
+    </div>
+
+    <div>
+      <div class="gradient-canvas" id="gradientCanvas"></div>
+    </div>
+
+    <div class="mixer-controls">
+      <button class="control-btn" id="addColorBtn" title="Add color point">+</button>
+      <button class="control-btn" id="removeColorBtn" title="Remove active color point">-</button>
+    </div>
+
+    <div>
+      <div class="section-title">Color Palette</div>
+      <div class="palette-row" id="paletteRow">
+        <div class="palette-color" style="background-color: #181818" data-color="#181818"></div>
+        <div class="palette-color" style="background-color: #d4af37" data-color="#d4af37"></div>
+        <div class="palette-color" style="background-color: #E91E63" data-color="#E91E63"></div>
+        <div class="palette-color" style="background-color: #9C27B0" data-color="#9C27B0"></div>
+        <div class="palette-color" style="background-color: #2196F3" data-color="#2196F3"></div>
+        <div class="palette-color" style="background-color: #4CAF50" data-color="#4CAF50"></div>
+        <div class="palette-color" style="background-color: #FF5722" data-color="#FF5722"></div>
+        <div class="palette-color" style="background-color: #607D8B" data-color="#607D8B"></div>
+      </div>
+    </div>
+
+    <div class="sliders-section">
+      <div class="slider-group">
+        <div class="slider-header">
+          <div class="section-title" style="margin: 0;">Gradient Angle</div>
+          <div class="slider-value" id="angleVal">90°</div>
+        </div>
+        <input type="range" id="angleSlider" min="0" max="360" value="90">
+      </div>
+
+      <div class="slider-group">
+        <div class="slider-header">
+          <div class="section-title" style="margin: 0;">Border Radius</div>
+          <div class="slider-value" id="radiusVal">0px</div>
+        </div>
+        <input type="range" id="radiusSlider" min="0" max="24" value="0">
+      </div>
+    </div>
+
+    <button class="action-btn" id="resetBtn">Reset to Default</button>
+  </div>
+
+  <script src="chrome://branding/content/theme-mixer.js"></script>
+</body>
+</html>

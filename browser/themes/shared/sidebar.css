@@ -66,10 +66,10 @@
   flex: 1;
 
   @media -moz-pref("sidebar.revamp") {
-    border-radius: var(--border-radius-medium);
+    border-radius: var(--fapybara-border-radius, var(--border-radius-medium)) !important;
     box-shadow: var(--content-area-shadow);
     outline: 0.5px solid var(--sidebar-border-color);
-    background-color: var(--sidebar-background-color);
+    background-color: transparent !important;
     color: var(--sidebar-text-color);
   }
 }
@@ -282,6 +282,11 @@ sidebar-main,
   &[sidebar-ongoing-animations] > sidebar-main::part(overflow-button) {
     display: none;
   }
+
+  background-color: var(--fapybara-sidebar-bg) !important;
+  background-image: var(--fapybara-gradient-bg) !important;
+  color: var(--fapybara-text-color) !important;
+  border-radius: var(--fapybara-border-radius, 0px) !important;
 }
 
 /* Drive the sidebar-main shadow DOM's launcher button inline padding from the

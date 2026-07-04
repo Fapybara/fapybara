@@ -23,3 +23,7 @@ browser.jar:
   content/branding/background.png                (../background.png)
   content/branding/fapybara-search.html          (../fapybara-search.html)
   content/branding/fapybara-search.css           (../fapybara-search.css)
+  content/branding/fapybara-theme.js             (fapybara-theme.js)
+  content/branding/theme-mixer.html              (theme-mixer.html)
+  content/branding/theme-mixer.js                (theme-mixer.js)
+

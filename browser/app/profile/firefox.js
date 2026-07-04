@@ -2221,6 +2221,12 @@ pref("sidebar.revamp", true);
 pref("sidebar.revamp", false);
 #endif
 pref("sidebar.revamp.round-content-area", false);
+pref("fapybara.theme.sidebar-bg", "#181818");
+pref("fapybara.theme.accent-color", "#d4af37");
+pref("fapybara.theme.text-color", "#ffffff");
+pref("fapybara.theme.border-radius", "0px");
+pref("fapybara.theme.gradient-angle", "90");
+pref("fapybara.theme.gradient-points", "[{\"id\":1,\"x\":0,\"color\":\"#181818\"},{\"id\":2,\"x\":100,\"color\":\"#d4af37\"}]");
 pref("sidebar.animation.enabled", true);
 pref("sidebar.animation.duration-ms", 200);
 pref("sidebar.animation.expand-on-hover.duration-ms", 400);
