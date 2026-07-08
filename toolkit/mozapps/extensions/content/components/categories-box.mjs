@@ -57,7 +57,7 @@ const CATEGORIES = [
     iconSrc: "chrome://mozapps/skin/extensions/category-themes.svg",
     l10nId: "addon-category-theme",
     titleL10nId: "addon-category-theme-title",
-    defaultHidden: false,
+    defaultHidden: true,
   },
   {
     name: "plugin",

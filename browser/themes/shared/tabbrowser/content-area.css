@@ -127,7 +127,17 @@
 #tabbrowser-tabbox {
   position: relative;
   z-index: var(--browser-area-z-index-tabbox);
-  margin: 0;
+  margin: 8px !important;
+  border-radius: var(--fapybara-border-radius, 12px) !important;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: var(--tabpanel-background-color, #1c1c1c) !important;
+  overflow: clip !important;
+}
+
+#browser {
+  background-color: var(--fapybara-sidebar-bg) !important;
+  background-image: var(--fapybara-gradient-bg) !important;
 }
 
 /* We set large flex on both containers to allow the devtools toolbox to

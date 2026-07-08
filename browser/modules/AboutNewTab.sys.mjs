@@ -18,7 +18,7 @@ ChromeUtils.defineESModuleGetters(lazy, {
     "resource://gre/modules/TelemetryReportingPolicy.sys.mjs",
 });
 
-const ABOUT_URL = "chrome://branding/content/fapybara-search.html";
+const ABOUT_URL = "about:blank";
 const PREF_ACTIVITY_STREAM_DEBUG = "browser.newtabpage.activity-stream.debug";
 // AboutHomeStartupCache needs us in "quit-application", so stay alive longer.
 // TODO: We could better have a shared async shutdown blocker?

@@ -283,10 +283,26 @@ sidebar-main,
     display: none;
   }
 
-  background-color: var(--fapybara-sidebar-bg) !important;
-  background-image: var(--fapybara-gradient-bg) !important;
+  position: relative !important;
+  background: transparent !important;
   color: var(--fapybara-text-color) !important;
   border-radius: var(--fapybara-border-radius, 0px) !important;
+}
+
+#sidebar-container::before {
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: -1 !important;
+  background-color: var(--fapybara-sidebar-bg) !important;
+  background-image: var(--fapybara-gradient-bg) !important;
+  opacity: 0.78 !important;
+  backdrop-filter: blur(24px) !important;
+  border-radius: inherit !important;
+  pointer-events: none !important;
 }
 
 /* Drive the sidebar-main shadow DOM's launcher button inline padding from the

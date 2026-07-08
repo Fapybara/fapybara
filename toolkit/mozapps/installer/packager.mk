@@ -138,7 +138,9 @@ make-package: FORCE
 	$(MAKE) make-package-internal
 ifeq (WINNT,$(OS_ARCH))
 ifeq ($(MOZ_PKG_FORMAT),ZIP)
+ifdef MAKENSISU
 	$(MAKE) -C windows ZIP_IN='$(ABS_DIST)/$(PACKAGE)' installer
+endif
 endif
 endif
 ifdef MOZ_AUTOMATION

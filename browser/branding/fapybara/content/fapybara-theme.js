@@ -5,7 +5,18 @@
 "use strict";
 
 try {
-  const { Services } = ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs");
+  let Services = globalThis.Services;
+  if (!Services) {
+    try {
+      ({ Services } = ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs"));
+    } catch (e) {
+      try {
+        ({ Services } = ChromeUtils.import("resource://gre/modules/Services.jsm"));
+      } catch (err) {
+        console.error("Fapybara Theme: Could not import Services");
+      }
+    }
+  }
 
   if (!globalThis.FapybaraThemeManager) {
     class FapybaraThemeManagerClass {
@@ -79,6 +90,15 @@ try {
         this.pontos = newPoints;
         this.gradientAngle = String(newAngle);
         this.borderRadius = `${newRadius}px`;
+        
+        if (newPoints && newPoints.length > 0) {
+          this.sidebarBg = newPoints[0].color;
+          if (newPoints.length > 1) {
+            this.accentColor = newPoints[newPoints.length - 1].color;
+          } else {
+            this.accentColor = newPoints[0].color;
+          }
+        }
         
         if (this.initialized) {
           this.checkStatusAndApply();

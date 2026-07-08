@@ -331,7 +331,8 @@ pref("browser.shell.setDefaultPDFHandler.attemptWaitTimeMs", 30000);
 // 0 = blank, 1 = home (browser.startup.homepage), 2 = last visited page, 3 = resume previous browser session
 // The behavior of option 3 is detailed at: http://wiki.mozilla.org/Session_Restore
 pref("browser.startup.page",                1);
-pref("browser.startup.homepage",            "chrome://branding/content/fapybara-search.html");
+pref("browser.startup.homepage",            "about:blank");
+pref("browser.newtabpage.enabled",           false);
 pref("browser.startup.homepage.abouthome_cache.enabled", true);
 pref("browser.startup.homepage.abouthome_cache.loglevel", "Warn");
 

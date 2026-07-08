@@ -4,7 +4,18 @@
 
 "use strict";
 
-const { Services } = ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs");
+let Services = globalThis.Services;
+if (!Services) {
+  try {
+    ({ Services } = ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs"));
+  } catch (e) {
+    try {
+      ({ Services } = ChromeUtils.import("resource://gre/modules/Services.jsm"));
+    } catch (err) {
+      console.error("Fapybara Theme Mixer: Could not import Services");
+    }
+  }
+}
 
 // Default palette list
 const defaultPalette = [
@@ -19,7 +30,15 @@ let angle = 90;
 let borderRadius = 0;
 
 // Find main window manager for live updates
-let manager = window.top?.FapybaraThemeManager || window.opener?.FapybaraThemeManager;
+let manager = null;
+try {
+  manager = window.top?.FapybaraThemeManager || 
+            window.opener?.FapybaraThemeManager || 
+            window.docShell?.chromeEventHandler?.ownerGlobal?.FapybaraThemeManager;
+  console.log("Fapybara Theme Mixer: Manager found =", !!manager);
+} catch (e) {
+  console.error("Fapybara Theme Mixer: Error resolving manager:", e);
+}
 
 // DOM Elements
 const canvas = document.getElementById("gradientCanvas");
