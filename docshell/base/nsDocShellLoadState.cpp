@@ -162,6 +162,14 @@ nsDocShellLoadState::nsDocShellLoadState(
       return;
     }
 
+    // Proteção de Segurança: Rejeitar tentativas de load javascript: entre processos
+    if (mURI->SchemeIs("javascript") &&
+        mTriggeringRemoteType != NOT_REMOTE_TYPE) {
+      aActor->FatalError("Illegal cross-process javascript: load attempt");
+      return;
+    }
+
+    // Validações originais do Fapybara
     if (!ValidatePrincipalCouldPotentiallyBeLoadedBy(
             mTriggeringPrincipal, GetEffectiveTriggeringRemoteType(),
             {ValidatePrincipalOptions::AllowExpanded,
