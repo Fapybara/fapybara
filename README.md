@@ -21,12 +21,21 @@
   <a href="#português">Português</a>
 </p>
 
+<p align="center">
+  <a href="https://neuronal.ia.br/downloads/fapybara-154.0a1.pt-BR.win64.installer.exe">
+    <img src="https://img.shields.io/badge/Download-Windows%2064--bit-brightgreen?style=for-the-badge&logo=windows" alt="Download Windows">
+  </a>
+</p>
+
 ---
 
 <span id="english"></span>
 ## English Version
 
 **Fapybara** is a custom, independent fork of Firefox designed for visual elegance and a clean "Zen" workspace. It blends modern user interface paradigms—such as native vertical tabs and a floating viewport inspired by Opera One and Arc—with a strict data privacy policy that completely strips away Mozilla's native telemetry.
+
+### 📥 Download
+* **Windows (64-bit)**: [Download Installer (.exe)](https://neuronal.ia.br/downloads/fapybara-154.0a1.pt-BR.win64.installer.exe)
 
 ### 🌟 Key Features
 
@@ -89,6 +98,9 @@ To package the browser with multi-locale support, run:
 ## Versão em Português
 
 O **Fapybara** é um fork personalizado e independente do Firefox, projetado para oferecer uma experiência visual fluida e uma interface "Zen" minimalista. Ele combina conceitos modernos de design de interfaces (como abas verticais e bordas flutuantes inspiradas no Opera One e Arc) com uma política rigorosa de privacidade de dados, eliminando completamente a telemetria nativa da Mozilla.
+
+### 📥 Download
+* **Windows (64 bits)**: [Baixar Instalador (.exe)](https://neuronal.ia.br/downloads/fapybara-154.0a1.pt-BR.win64.installer.exe)
 
 ### 🌟 Principais Recursos
 
