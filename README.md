@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="browser/branding/fapybara/content/about-logo.png" alt="Fapybara Logo" width="140" height="140">
+  <img src="Extras/T02.png" alt="Fapybara Banner" width="800">
 </p>
 
 <h1 align="center">Fapybara Browser 🦦</h1>
