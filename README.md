@@ -5,12 +5,12 @@
 <h1 align="center">Fapybara Browser 🦦</h1>
 
 <p align="center">
-  <strong>Um navegador moderno, minimalista e focado em privacidade, construído sobre a plataforma Firefox ESR.</strong>
+  <strong>Um navegador moderno, minimalista e focado em privacidade, construído sobre a plataforma Firefox.</strong>
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Platform-Windows-blue?style=flat-square" alt="Platform Windows">
-  <img src="https://img.shields.io/badge/Engine-Gecko%20%2F%20Firefox%20ESR-orange?style=flat-square" alt="Engine Firefox ESR">
+  <img src="https://img.shields.io/badge/Engine-Gecko%20%2F%20Firefox-orange?style=flat-square" alt="Engine Firefox">
   <img src="https://img.shields.io/badge/Telemetry-Disabled-red?style=flat-square" alt="Telemetry Disabled">
   <img src="https://img.shields.io/badge/License-MPL%202.0-brightgreen?style=flat-square" alt="License MPL 2.0">
 </p>
