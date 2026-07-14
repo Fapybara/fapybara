@@ -55,7 +55,8 @@ Ensure your `mozconfig` includes optimization flags and the custom update channe
 ```ini
 ac_add_options --enable-optimize
 ac_add_options --enable-update-channel=fapybara
-ac_add_options --disable-updater
+ac_add_options --enable-updater
+ac_add_options --enable-unverified-updates
 ac_add_options --disable-maintenance-service
 ```
 
@@ -120,7 +121,8 @@ Garanta que seu arquivo `mozconfig` contenha as opções corretas, incluindo a a
 ```ini
 ac_add_options --enable-optimize
 ac_add_options --enable-update-channel=fapybara
-ac_add_options --disable-updater
+ac_add_options --enable-updater
+ac_add_options --enable-unverified-updates
 ac_add_options --disable-maintenance-service
 ```
 

@@ -13,10 +13,10 @@ pref("app.update.interval", 7200); // 2 hours
 pref("app.update.promptWaitTime", 43200);
 // URL user can browse to manually if for some reason all update installation
 // attempts fail.
-pref("app.update.url.manual", "");
+pref("app.update.url.manual", "https://github.com/Fapybara/fapybara/releases");
 // A default value for the "More information about this update" link
 // supplied in the "An update is available" page of the update wizard.
-pref("app.update.url.details", "");
+pref("app.update.url.details", "https://github.com/Fapybara/fapybara/releases");
 
 pref("app.releaseNotesURL", "");
 pref("app.releaseNotesURL.aboutDialog", "");
