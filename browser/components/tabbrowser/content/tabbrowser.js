@@ -4282,7 +4282,7 @@
         usingPreloadedContent = false;
       // If we open a new tab with the newtab URL in the default
       // userContext, check if there is a preloaded browser ready.
-      if (uriString == BROWSER_NEW_TAB_URL && !userContextId) {
+      if (uriString == BROWSER_NEW_TAB_URL && BROWSER_NEW_TAB_URL != "about:blank" && !userContextId) {
         b = NewTabPagePreloading.getPreloadedBrowser(window);
         if (b) {
           usingPreloadedContent = true;

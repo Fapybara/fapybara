@@ -36,7 +36,8 @@ export let NewTabPagePreloading = {
     return (
       this.prefEnabled &&
       this.newTabEnabled &&
-      !lazy.AboutNewTab.newTabURLOverridden
+      !lazy.AboutNewTab.newTabURLOverridden &&
+      lazy.AboutNewTab.newTabURL !== "about:blank"
     );
   },
 
