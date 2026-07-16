@@ -439,6 +439,10 @@ mozilla-central/
 *.iso
 *.zip
 *.tar.gz
+*.mar
+*.so
+*.log
+*.dll
 
 # Ignorar tudo do sccache
 .sccache/
