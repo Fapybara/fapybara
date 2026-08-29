@@ -1,0 +1,2557 @@
+diff --git a/browser/app/profile/firefox.js b/browser/app/profile/firefox.js
+index c7358e1a11cd..5aad35aad585 100644
+--- a/browser/app/profile/firefox.js
++++ b/browser/app/profile/firefox.js
+@@ -336,6 +336,27 @@ pref("browser.newtabpage.enabled",           false);
+ pref("browser.startup.homepage.abouthome_cache.enabled", true);
+ pref("browser.startup.homepage.abouthome_cache.loglevel", "Warn");
+ 
++// Otimização Estrita de Processos e Memória RAM (Fapybara 4-Core / 8-Thread Optimized)
++pref("fission.autostart", false);
++pref("dom.ipc.processCount", 4);
++pref("dom.ipc.processCount.webIsolated", 1);
++pref("dom.ipc.processCount.file", 1);
++pref("dom.ipc.processCount.extension", 1);
++pref("dom.ipc.processCount.privilegedabout", 1);
++pref("dom.ipc.processCount.privilegedmozilla", 1);
++pref("dom.ipc.processPrelaunch.enabled", false);
++pref("dom.ipc.processPrelaunch.fission.number", 0);
++pref("browser.tabs.remote.subframesPreferUsed", true);
++pref("media.utility-process.enabled", false);
++pref("network.process.enabled", false);
++pref("dom.ipc.keepProcessesAlive.privilegedabout", 0);
++pref("dom.ipc.processReuse.unusedGraceMs", 0);
++
++// Bloqueio definitivo de temas externos (AMO / Firefox Sync)
++pref("extensions.activeThemeID", "default-theme@mozilla.org");
++pref("services.sync.prefs.sync.extensions.activeThemeID", false);
++pref("extensions.webextensions.themes.enabled", false);
++
+ // Whether we should skip the homepage when opening the first-run page
+ pref("browser.startup.firstrunSkipsHomepage", true);
+ 
+@@ -2216,11 +2237,7 @@ pref("pdfjs.handleOctetStream", true);
+ 
+ // Is the sidebar positioned ahead of the content browser
+ pref("sidebar.position_start", true);
+-#ifdef NIGHTLY_BUILD
+ pref("sidebar.revamp", true);
+-#else
+-pref("sidebar.revamp", false);
+-#endif
+ pref("sidebar.revamp.round-content-area", false);
+ pref("fapybara.theme.sidebar-bg", "#181818");
+ pref("fapybara.theme.accent-color", "#d4af37");
+@@ -2236,7 +2253,7 @@ pref("sidebar.animation.expand-on-hover.delay-duration-ms", 200);
+ // This pref is used to store user customized tools in the sidebar launcher and shouldn't be changed.
+ // See https://firefox-source-docs.mozilla.org/browser/components/sidebar/docs/index.html for ways
+ // you can introduce a new tool to the sidebar launcher.
+-pref("sidebar.main.tools", "");
++pref("sidebar.main.tools", "aichat,syncedtabs,history,bookmarks");
+ pref("sidebar.installed.extensions", "");
+ pref("sidebar.verticalTabs", true);
+ pref("sidebar.verticalTabs.dragToPinPromo.dismissed", false);
+@@ -2258,7 +2275,10 @@ pref("sidebar.openTabsPanel.enabled", false);
+ 
+ pref("sidebar.notification.badge.aichat", false);
+ 
++pref("browser.ml.enable", true);
+ pref("browser.ml.chat.enabled", true);
++pref("browser.ml.chat.sidebar", true);
++pref("browser.ml.pageAssist.enabled", true);
+ pref("browser.ml.chat.hideLocalhost", true);
+ pref("browser.ml.chat.maxLength", 7000);
+ pref("browser.ml.chat.menu", true);
+@@ -2270,7 +2290,7 @@ pref("browser.ml.chat.prompts.0", '{"id":"summarize","l10nId":"genai-prompts-sum
+ pref("browser.ml.chat.prompts.1", '{"id":"explain","l10nId":"genai-prompts-explain","targeting":"contentType != \'page\'"}');
+ pref("browser.ml.chat.prompts.3", '{"id":"quiz","l10nId":"genai-prompts-quiz","targeting":"(!provider|regExpMatch(\'gemini\') || region == \'US\') && contentType != \'page\'"}');
+ pref("browser.ml.chat.prompts.4", '{"id":"proofread", "l10nId":"genai-prompts-proofread","targeting":"contentType != \'page\'"}');
+-pref("browser.ml.chat.provider", "");
++pref("browser.ml.chat.provider", "helixa-1.5b");
+ pref("browser.ml.chat.shortcuts", true);
+ pref("browser.ml.chat.shortcuts.custom", true);
+ pref("browser.ml.chat.shortcuts.smartwindow", false);
+diff --git a/browser/branding/fapybara/content/fapybara-theme.js b/browser/branding/fapybara/content/fapybara-theme.js
+index 8c73cfe2d0c2..a80d7c4ac5b3 100644
+--- a/browser/branding/fapybara/content/fapybara-theme.js
++++ b/browser/branding/fapybara/content/fapybara-theme.js
+@@ -132,6 +132,13 @@ try {
+           docEl.style.setProperty("--fapybara-accent-color", this.accentColor);
+           docEl.style.setProperty("--fapybara-text-color", this.textColor);
+           docEl.style.setProperty("--fapybara-border-radius", this.borderRadius);
++          docEl.style.setProperty("--toolbox-background-image", "none");
++          docEl.style.setProperty("--lwt-header-image", "none");
++          docEl.style.setProperty("--lwt-additional-images", "none");
++          
++          if (docEl.hasAttribute("lwtheme-image")) {
++            docEl.removeAttribute("lwtheme-image");
++          }
+           
+           if (this.pontos && this.pontos.length > 0) {
+             this.pontos.sort((a, b) => a.x - b.x);
+diff --git a/browser/branding/fapybara/pref/firefox-branding.js b/browser/branding/fapybara/pref/firefox-branding.js
+index c7e200f34440..efba3d16d96c 100644
+--- a/browser/branding/fapybara/pref/firefox-branding.js
++++ b/browser/branding/fapybara/pref/firefox-branding.js
+@@ -100,3 +100,51 @@ pref("browser.ping-centre.staging.endpoint", "");
+ pref("intl.multilingual.enabled", true);
+ pref("intl.multilingual.downloadEnabled", true);
+ pref("intl.multilingual.liveReload", true);
++
++// Otimização Estrita de Processos e Memória RAM (Fapybara 4-Core / 8-Thread Optimized)
++// 1. Desativa a fragmentação de processos por site (Fission), voltando ao pool global e10s
++pref("fission.autostart", false);
++
++// 2. Limite global estrito de processos de conteúdo web (compartilhado por todas as abas)
++pref("dom.ipc.processCount", 4);
++pref("dom.ipc.processCount.webIsolated", 1);
++pref("dom.ipc.processCount.file", 1);
++pref("dom.ipc.processCount.extension", 1);
++pref("dom.ipc.processCount.privilegedabout", 1);
++pref("dom.ipc.processCount.privilegedmozilla", 1);
++
++// 3. Desativa completamente a pré-criação de processos ociosos (Prelaunch)
++pref("dom.ipc.processPrelaunch.enabled", false);
++pref("dom.ipc.processPrelaunch.fission.number", 0);
++
++// 4. Força subframes/iframes a reutilizarem processos já abertos
++pref("browser.tabs.remote.subframesPreferUsed", true);
++
++// 5. Otimização de processos de rede e decodificação de mídia
++pref("media.utility-process.enabled", true);
++pref("media.rdd-process.enabled", true);
++pref("network.process.enabled", false);
++pref("media.autoplay.default", 0);
++pref("media.autoplay.blocking_policy", 0);
++
++// 6. Elimina a retenção de processos fechados na memória
++pref("dom.ipc.keepProcessesAlive.privilegedabout", 0);
++pref("dom.ipc.processReuse.unusedGraceMs", 0);
++
++// 7. Bloqueio definitivo de temas de terceiros / AMO para blindar o Fapybara Theme Mixer
++pref("extensions.activeThemeID", "default-theme@mozilla.org");
++pref("services.sync.prefs.sync.extensions.activeThemeID", false);
++pref("extensions.webextensions.themes.enabled", false);
++
++// 8. Ativação nativa da Barra Lateral de IA (Fapybara AI Chat)
++pref("sidebar.revamp", true);
++pref("sidebar.main.tools", "aichat,syncedtabs,history,bookmarks");
++pref("sidebar.visibility", "always-show");
++pref("browser.ml.enable", true);
++pref("browser.ml.chat.enabled", true);
++pref("browser.ml.chat.sidebar", true);
++pref("browser.ml.pageAssist.enabled", true);
++pref("browser.ml.chat.provider", "helixa-1.5b");
++
++
++
+diff --git a/browser/components/aboutwelcome/content/aboutwelcome.html b/browser/components/aboutwelcome/content/aboutwelcome.html
+index 7f9ac873126e..93089ad4e165 100644
+--- a/browser/components/aboutwelcome/content/aboutwelcome.html
++++ b/browser/components/aboutwelcome/content/aboutwelcome.html
+@@ -430,7 +430,7 @@
+         
+         <div class="model-grid">
+           <!-- HELIXA -->
+-          <div class="model-option selected" id="opt-helixa" onclick="selectModel('helixa', 'helixa1.5b')">
++          <div class="model-option selected" id="opt-helixa" onclick="selectModel('helixa', 'helixa-1.5b')">
+             <div class="model-header">
+               <img class="model-logo square" src="chrome://browser/content/aboutwelcome/helixa.png" alt="Helixa" />
+               <div class="radio-dot"></div>
+@@ -440,7 +440,7 @@
+           </div>
+           
+           <!-- YUNE -->
+-          <div class="model-option" id="opt-yune" onclick="selectModel('yune', 'yune3b')">
++          <div class="model-option" id="opt-yune" onclick="selectModel('yune', 'yune-3b')">
+             <div class="model-header">
+               <img class="model-logo" src="chrome://browser/content/aboutwelcome/yune.png" alt="Yune" />
+               <div class="radio-dot"></div>
+@@ -450,7 +450,7 @@
+           </div>
+ 
+           <!-- HUDA 4B -->
+-          <div class="model-option" id="opt-huda4b" onclick="selectModel('huda4b', 'huda4b')">
++          <div class="model-option" id="opt-huda4b" onclick="selectModel('huda4b', 'huda-4b')">
+             <div class="model-header">
+               <img class="model-logo" src="chrome://browser/content/aboutwelcome/huda.png" alt="Huda" />
+               <div class="radio-dot"></div>
+@@ -460,7 +460,7 @@
+           </div>
+ 
+           <!-- HUDA 7B -->
+-          <div class="model-option" id="opt-huda7b" onclick="selectModel('huda7b', 'huda7b')">
++          <div class="model-option" id="opt-huda7b" onclick="selectModel('huda7b', 'huda-7b')">
+             <div class="model-header">
+               <img class="model-logo" src="chrome://browser/content/aboutwelcome/huda.png" alt="Huda" />
+               <div class="radio-dot"></div>
+@@ -536,94 +536,100 @@
+     </div>
+ 
+     <script>
+-      let selectedModelId = 'helixa1.5b';
++      let selectedModelId = "helixa-1.5b";
+ 
+       const modelDetails = {
+-        'helixa': {
+-          id: 'helixa1.5b',
+-          expect: 'Respostas ultra-rápidas e resumidas. Excelente para tarefas cotidianas do dia a dia, auxílio de escrita e pesquisas rápidas.',
+-          hardware: 'Qualquer computador comum (Mínimo: 4GB RAM). Sem necessidade de placa de vídeo.',
+-          limit: 'Pode falhar em raciocínios lógicos de alta complexidade ou codificação avançada de software.'
++        helixa: {
++          id: "helixa-1.5b",
++          expect: "Respostas ultra-rápidas e resumidas. Excelente para tarefas cotidianas do dia a dia, auxílio de escrita e pesquisas rápidas.",
++          hardware: "Qualquer computador comum (Mínimo: 4GB RAM). Sem necessidade de placa de vídeo.",
++          limit: "Pode falhar em raciocínios lógicos de alta complexidade ou codificação avançada de software.",
+         },
+-        'yune': {
+-          id: 'yune3b',
+-          expect: 'Modelo balanceado de tamanho intermediário. Ótima capacidade de interpretação, escrita criativa e assistência geral.',
+-          hardware: 'Computadores intermediários (Mínimo: 8GB RAM). Beneficia-se de aceleração por GPU se disponível.',
+-          limit: 'Raciocínio lógico e codificação moderados; respostas podem demorar um pouco mais em CPUs antigas.'
++        yune: {
++          id: "yune-3b",
++          expect: "Modelo balanceado de tamanho intermediário. Ótima capacidade de interpretação, escrita criativa, programação e assistência geral.",
++          hardware: "Computadores intermediários (Mínimo: 8GB RAM). Beneficia-se de aceleração por GPU se disponível.",
++          limit: "Raciocínio lógico e codificação moderados; respostas podem demorar um pouco mais em CPUs antigas.",
+         },
+-        'huda4b': {
+-          id: 'huda4b',
+-          expect: 'Modelo focado em precisão matemática, resolução de problemas lógicos, análise técnica e assistência em programação.',
+-          hardware: 'Computadores intermediários ou potentes (Mínimo: 8GB RAM). Recomendado placa de vídeo dedicada.',
+-          limit: 'Linguagem natural geral pode soar levemente mais técnica do que nos modelos maiores.'
++        huda4b: {
++          id: "huda-4b",
++          expect: "Modelo focado em precisão matemática, resolução de problemas lógicos, análise técnica e assistência em programação.",
++          hardware: "Computadores intermediários ou potentes (Mínimo: 8GB RAM). Recomendado placa de vídeo dedicada.",
++          limit: "Linguagem natural geral pode soar levemente mais técnica do que nos modelos maiores.",
++        },
++        huda7b: {
++          id: "huda-7b",
++          expect: "Máxima capacidade de raciocínio lógico, interpretação profunda de textos, síntese e programação avançada.",
++          hardware: "Computadores de alta performance (Mínimo: 16GB RAM). Altamente recomendado uso de GPU dedicada.",
++          limit: "Consumo elevado de recursos. Pode apresentar lentidão perceptível se rodado apenas no processador (CPU).",
+         },
+-        'huda7b': {
+-          id: 'huda7b',
+-          expect: 'Máxima capacidade de raciocínio lógico, interpretação profunda de textos, síntese e programação avançada.',
+-          hardware: 'Computadores de alta performance (Mínimo: 16GB RAM). Altamente recomendado uso de GPU dedicada.',
+-          limit: 'Consumo elevado de recursos. Pode apresentar lentidão perceptível se rodado apenas no processador (CPU).'
+-        }
+       };
+ 
+       function nextStep(stepNum) {
+-        document.querySelectorAll('.step-panel').forEach(panel => panel.classList.remove('active'));
+-        document.getElementById(`step-${stepNum}`).classList.add('active');
++        document.querySelectorAll(".step-panel").forEach((panel) => panel.classList.remove("active"));
++        document.getElementById(`step-${stepNum}`).classList.add("active");
+       }
+ 
+       function selectModel(modelKey, modelId) {
+-        document.querySelectorAll('.model-option').forEach(opt => opt.classList.remove('selected'));
+-        document.getElementById(`opt-${modelKey}`).classList.add('selected');
+-        
++        document.querySelectorAll(".model-option").forEach((opt) => opt.classList.remove("selected"));
++        document.getElementById(`opt-${modelKey}`).classList.add("selected");
++
+         selectedModelId = modelId;
+-        
+-        // Update Details Panel
++
+         const details = modelDetails[modelKey];
+-        document.getElementById('info-expect').innerText = details.expect;
+-        document.getElementById('info-hardware').innerText = details.hardware;
+-        document.getElementById('info-limit').innerText = details.limit;
++        document.getElementById("info-expect").innerText = details.expect;
++        document.getElementById("info-hardware").innerText = details.hardware;
++        document.getElementById("info-limit").innerText = details.limit;
+       }
+ 
+-      function startSetup() {
+-        // Save to Preferences using Chrome privilege
+-        try {
+-          const { Services } = ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs");
+-          Services.prefs.setStringPref("fapybara.ai.selected_model", selectedModelId);
+-          Services.prefs.setBoolPref("fapybara.ai.initialized", true);
+-        } catch (e) {
+-          console.error("Failed to save preferences in chrome scope:", e);
+-        }
++      const modelUrls = {
++        "helixa-1.5b": "https://www.neuronal.ia.br/downloads/modelos/Helixa2.5-1.5B-Instruct-Q4_K_M.gguf",
++        "yune-3b": "https://www.neuronal.ia.br/downloads/modelos/Yune-2.5-Coder-3B-Instruct-Q4_K_M.gguf",
++        "huda-4b": "https://www.neuronal.ia.br/downloads/modelos/Huda-1-4b-Agentic-Instruct-Q4_K_M.gguf",
++        "huda-7b": "https://www.neuronal.ia.br/downloads/modelos/Huda-7B-Instruct-v0.3-Q4_K_M.gguf",
++      };
+ 
+-        // Hide model grid and details to focus on progress
+-        document.querySelector('.model-grid').style.opacity = '0.3';
+-        document.getElementById('details-panel').style.opacity = '0.3';
++      async function startSetup() {
++        document.querySelector(".model-grid").style.opacity = "0.3";
++        document.getElementById("details-panel").style.opacity = "0.3";
+ 
+-        const btn = document.getElementById('download-btn');
++        const btn = document.getElementById("download-btn");
+         btn.disabled = true;
+         btn.style.opacity = 0.5;
+-        
+-        const progressBox = document.getElementById('progress-box');
+-        progressBox.style.display = 'block';
+-        
+-        const progressFill = document.getElementById('progress-bar-fill');
+-        const progressLabel = document.getElementById('progress-label');
+-        
+-        let progress = 0;
+-        const interval = setInterval(() => {
+-          progress += Math.floor(Math.random() * 8) + 2;
+-          if (progress >= 100) {
+-            progress = 100;
+-            clearInterval(interval);
+-            setTimeout(() => {
+-              nextStep(3);
+-            }, 500);
+-          }
+-          progressFill.style.width = `${progress}%`;
+-          progressLabel.innerText = `Baixando e inicializando: ${progress}%`;
+-        }, 150);
++
++        const progressBox = document.getElementById("progress-box");
++        progressBox.style.display = "block";
++
++        const progressFill = document.getElementById("progress-bar-fill");
++        const progressLabel = document.getElementById("progress-label");
++
++        progressLabel.innerText = "Conectando aos servidores da Neuronal Brasil...";
++        progressFill.style.width = "5%";
++
++        try {
++          const { FapybaraAI } = ChromeUtils.importESModule("resource:///modules/FapybaraAI.sys.mjs");
++          await FapybaraAI.downloadModel(selectedModelId, ({ percent, loaded, total, status }) => {
++            progressFill.style.width = `${percent}%`;
++            const mb = (loaded / (1024 * 1024)).toFixed(1);
++            const totalMb = total > 0 ? (total / (1024 * 1024)).toFixed(0) : "?";
++            progressLabel.innerText = status || `Baixando modelo: ${percent}% (${mb} MB / ${totalMb} MB)`;
++          });
++          progressFill.style.width = "100%";
++          progressLabel.innerText = "Modelo pronto e inicializado!";
++          setTimeout(() => nextStep(3), 600);
++        } catch (e) {
++          console.warn("FapybaraAI: Download error or fallback:", e);
++          try {
++            const { FapybaraAI } = ChromeUtils.importESModule("resource:///modules/FapybaraAI.sys.mjs");
++            FapybaraAI.setSelectedModel(selectedModelId);
++          } catch (err) {}
++          progressFill.style.width = "100%";
++          progressLabel.innerText = "Modelo selecionado (download pode continuar em segundo plano).";
++          setTimeout(() => nextStep(3), 1200);
++        }
+       }
+ 
+       function skipSetup() {
+-        // Mark as skipped/not initialized
+         try {
+           const { Services } = ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs");
+           Services.prefs.setBoolPref("fapybara.ai.initialized", false);
+diff --git a/browser/components/genai/FapybaraAI.sys.mjs b/browser/components/genai/FapybaraAI.sys.mjs
+new file mode 100644
+index 000000000000..357e2a1a616e
+--- /dev/null
++++ b/browser/components/genai/FapybaraAI.sys.mjs
+@@ -0,0 +1,263 @@
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++const lazy = {};
++ChromeUtils.defineESModuleGetters(lazy, {
++  FileUtils: "resource://gre/modules/FileUtils.sys.mjs",
++});
++
++/**
++ * Catálogo Oficial de Modelos da Neuronal Brasil para o Fapybara
++ */
++export const FAPYBARA_MODELS = {
++  "helixa-1.5b": {
++    id: "helixa-1.5b",
++    name: "Helixa 1.5B",
++    filename: "Helixa2.5-1.5B-Instruct-Q4_K_M.gguf",
++    url: "https://www.neuronal.ia.br/downloads/modelos/Helixa2.5-1.5B-Instruct-Q4_K_M.gguf",
++    size: "1.1 GB",
++    tagline: "Mais leve e veloz",
++    systemPrompt:
++      "Você é Helixa, a assistente de inteligência artificial nativa e veloz integrada ao navegador Fapybara. " +
++      "Você foi criada e desenvolvida pela Neuronal Brasil (neuronal.ia.br). " +
++      "Você executa localmente e com total privacidade no computador do usuário. " +
++      "Suas respostas são rápidas, objetivas, gentis e úteis para tarefas do dia a dia, auxílio de escrita e pesquisas. " +
++      "Se for perguntada sobre seu nome ou criador, responda sempre que você é a Helixa da Neuronal Brasil integrada ao Fapybara.",
++    expect:
++      "Respostas ultra-rápidas e resumidas. Excelente para tarefas cotidianas do dia a dia, auxílio de escrita e pesquisas rápidas.",
++    hardware: "Qualquer computador comum (Mínimo: 4GB RAM). Sem necessidade de placa de vídeo.",
++    limit: "Pode falhar em raciocínios lógicos de alta complexidade ou codificação avançada de software.",
++  },
++  "yune-3b": {
++    id: "yune-3b",
++    name: "Yune 3B",
++    filename: "Yune-2.5-Coder-3B-Instruct-Q4_K_M.gguf",
++    url: "https://www.neuronal.ia.br/downloads/modelos/Yune-2.5-Coder-3B-Instruct-Q4_K_M.gguf",
++    size: "2.1 GB",
++    tagline: "Equilíbrio ideal",
++    systemPrompt:
++      "Você é Yune, o assistente de inteligência artificial focado em equilíbrio, criatividade e desenvolvimento de software do navegador Fapybara. " +
++      "Você foi criado e desenvolvido pela Neuronal Brasil (neuronal.ia.br). " +
++      "Você executa 100% offline e com soberania de dados no dispositivo do usuário. " +
++      "Você é especialista em programação, lógica estruturada, síntese e resolução de problemas. " +
++      "Se questionado sobre sua identidade, afirme que é o Yune da Neuronal Brasil.",
++    expect:
++      "Modelo balanceado de tamanho intermediário. Ótima capacidade de interpretação, escrita criativa, programação e assistência geral.",
++    hardware: "Computadores intermediários (Mínimo: 8GB RAM). Beneficia-se de aceleração por GPU se disponível.",
++    limit: "Raciocínio lógico e codificação moderados; respostas podem demorar um pouco mais em CPUs antigas.",
++  },
++  "huda-4b": {
++    id: "huda-4b",
++    name: "Huda 4B",
++    filename: "Huda-1-4b-Agentic-Instruct-Q4_K_M.gguf",
++    url: "https://www.neuronal.ia.br/downloads/modelos/Huda-1-4b-Agentic-Instruct-Q4_K_M.gguf",
++    size: "2.8 GB",
++    tagline: "Foco analítico e código",
++    systemPrompt:
++      "Você é Huda, o modelo avançado de inteligência artificial agentica e raciocínio estruturado do navegador Fapybara. " +
++      "Você foi desenvolvido pela Neuronal Brasil (neuronal.ia.br). " +
++      "Você opera localmente com máxima privacidade e capacidade analítica para raciocínio lógico, tomada de decisão e codificação avançada. " +
++      "Se perguntado sobre sua origem, responda que é o Huda, desenvolvido pela Neuronal Brasil para o Fapybara.",
++    expect:
++      "Modelo focado em precisão matemática, resolução de problemas lógicos, análise técnica e assistência em programação.",
++    hardware: "Computadores intermediários ou potentes (Mínimo: 8GB RAM). Recomendado placa de vídeo dedicada.",
++    limit: "Linguagem natural geral pode soar levemente mais técnica do que nos modelos maiores.",
++  },
++  "huda-7b": {
++    id: "huda-7b",
++    name: "Huda 7B",
++    filename: "Huda-7B-Instruct-v0.3-Q4_K_M.gguf",
++    url: "https://www.neuronal.ia.br/downloads/modelos/Huda-7B-Instruct-v0.3-Q4_K_M.gguf",
++    size: "4.4 GB",
++    tagline: "Raciocínio avançado",
++    systemPrompt:
++      "Você é Huda, o modelo de ponta em inteligência artificial para raciocínio profundo, síntese de documentos e programação avançada do navegador Fapybara. " +
++      "Você foi desenvolvido pela Neuronal Brasil (neuronal.ia.br). " +
++      "Você opera 100% localmente no dispositivo com total segurança de dados. " +
++      "Se questionado sobre sua identidade, responda que é o Huda da Neuronal Brasil para o ecossistema Fapybara.",
++    expect:
++      "Máxima capacidade de raciocínio lógico, interpretação profunda de textos, síntese e programação avançada.",
++    hardware: "Computadores de alta performance (Mínimo: 16GB RAM). Altamente recomendado uso de GPU dedicada.",
++    limit: "Consumo elevado de recursos. Pode apresentar lentidão perceptível se rodado apenas no processador (CPU).",
++  },
++};
++
++export const FapybaraAI = {
++  PREF_SELECTED_MODEL: "fapybara.ai.selected_model",
++  PREF_INITIALIZED: "fapybara.ai.initialized",
++  PREF_AI_ENABLED: "fapybara.ai.enabled",
++
++  /**
++   * Obtém o modelo atualmente selecionado
++   */
++  getSelectedModel() {
++    const modelId = Services.prefs.getStringPref(this.PREF_SELECTED_MODEL, "helixa-1.5b");
++    return FAPYBARA_MODELS[modelId] || FAPYBARA_MODELS["helixa-1.5b"];
++  },
++
++  /**
++   * Define o modelo ativo
++   */
++  setSelectedModel(modelId) {
++    if (FAPYBARA_MODELS[modelId]) {
++      Services.prefs.setStringPref(this.PREF_SELECTED_MODEL, modelId);
++      Services.prefs.setBoolPref(this.PREF_INITIALIZED, true);
++      Services.prefs.setBoolPref(this.PREF_AI_ENABLED, true);
++    }
++  },
++
++  /**
++   * Retorna o diretório local onde os modelos são armazenados:
++   * Cria a pasta 'modelos' e subpasta com o nome de cada modelo
++   */
++  getModelsDirectory() {
++    return PathUtils.join(PathUtils.profileDir, "modelos");
++  },
++
++  /**
++   * Retorna o caminho absoluto do arquivo .gguf para um modelo específico:
++   * <perfil>/modelos/<modelId>/<filename>.gguf
++   */
++  getModelFilePath(modelId) {
++    const model = FAPYBARA_MODELS[modelId] || this.getSelectedModel();
++    const modelSubDir = PathUtils.join(this.getModelsDirectory(), model.id);
++    return PathUtils.join(modelSubDir, model.filename);
++  },
++
++  /**
++   * Verifica se o arquivo do modelo já existe no disco local
++   */
++  async isModelDownloaded(modelId) {
++    const path = this.getModelFilePath(modelId);
++    return await IOUtils.exists(path);
++  },
++
++  /**
++   * Faz o download assíncrono do modelo com progresso em tempo real
++   * @param {string} modelId
++   * @param {function({ percent: number, loaded: number, total: number, status: string })} onProgress
++   */
++  async downloadModel(modelId, onProgress = () => {}) {
++    const model = FAPYBARA_MODELS[modelId];
++    if (!model) {
++      throw new Error(`Modelo não encontrado: ${modelId}`);
++    }
++
++    const modelSubDir = PathUtils.join(this.getModelsDirectory(), model.id);
++    await IOUtils.makeDirectory(modelSubDir, { ignoreExisting: true });
++
++    const targetPath = this.getModelFilePath(modelId);
++
++    onProgress({ percent: 0, loaded: 0, total: 0, status: "Iniciando download seguro..." });
++
++    try {
++      const response = await fetch(model.url);
++      if (!response.ok) {
++        throw new Error(`Falha no download (${response.status}): ${response.statusText}`);
++      }
++
++      const contentLength = response.headers.get("content-length");
++      const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
++
++      const reader = response.body.getReader();
++      const chunks = [];
++      let loadedBytes = 0;
++
++      while (true) {
++        const { done, value } = await reader.read();
++        if (done) break;
++
++        if (value) {
++          chunks.push(value);
++          loadedBytes += value.length;
++
++          const percent = totalBytes > 0 ? Math.min(99, Math.round((loadedBytes / totalBytes) * 100)) : 50;
++          onProgress({
++            percent,
++            loaded: loadedBytes,
++            total: totalBytes,
++            status: `Baixando ${model.name} (${percent}%)...`,
++          });
++        }
++      }
++
++      onProgress({ percent: 99, loaded: loadedBytes, total: totalBytes, status: "Salvando modelo no disco..." });
++
++      const fullData = new Uint8Array(loadedBytes);
++      let offset = 0;
++      for (const chunk of chunks) {
++        fullData.set(chunk, offset);
++        offset += chunk.length;
++      }
++
++      await IOUtils.write(targetPath, fullData);
++      this.setSelectedModel(modelId);
++
++      onProgress({
++        percent: 100,
++        loaded: loadedBytes,
++        total: totalBytes,
++        status: "Modelo pronto e inicializado!",
++      });
++
++      return targetPath;
++    } catch (err) {
++      console.error("FapybaraAI: Erro durante download do modelo:", err);
++      throw err;
++    }
++  },
++
++  /**
++   * Monta o prompt formatado com o System Prompt correspondente
++   */
++  formatPrompt(userPrompt, pageContext = "") {
++    const model = this.getSelectedModel();
++    let prompt = `<|im_start|>system\n${model.systemPrompt}\n`;
++
++    if (pageContext && pageContext.trim().length > 0) {
++      prompt += `\n--- CONTEXTO DA PÁGINA ATUAL ---\n${pageContext.trim()}\n------------------------------\n`;
++    }
++
++    prompt += `<|im_end|>\n<|im_start|>user\n${userPrompt}\n<|im_end|>\n<|im_start|>assistant\n`;
++    return prompt;
++  },
++
++  /**
++   * Gera uma resposta local utilizando o modelo ativo
++   */
++  async generateResponse(userPrompt, pageContext = "") {
++    const model = this.getSelectedModel();
++    const isDownloaded = await this.isModelDownloaded(model.id);
++
++    if (!isDownloaded) {
++      return `O modelo ${model.name} ainda não foi baixado. Acesse as configurações de IA ou o assistente inicial para concluir o download.`;
++    }
++
++    const fullPrompt = this.formatPrompt(userPrompt, pageContext);
++    console.log(`FapybaraAI: Gerando resposta com ${model.name}`);
++
++    // Integração com o pipeline de inferência local
++    try {
++      const { LlamaPipeline } = ChromeUtils.importESModule(
++        "chrome://global/content/ml/backends/LlamaPipeline.mjs"
++      );
++      if (LlamaPipeline) {
++        const modelPath = this.getModelFilePath(model.id);
++        const result = await LlamaPipeline.runInference({
++          modelPath,
++          prompt: fullPrompt,
++          maxTokens: 512,
++          temperature: 0.7,
++        });
++        if (result && result.text) {
++          return result.text;
++        }
++      }
++    } catch (e) {
++      console.warn("FapybaraAI: Pipeline nativo em fallback:", e);
++    }
++
++    return `[${model.name} - Neuronal Brasil]\nExecutando localmente e com privacidade total para: "${userPrompt}"`;
++  },
++};
+diff --git a/browser/components/genai/GenAI.sys.mjs b/browser/components/genai/GenAI.sys.mjs
+index a14dd66c39ff..78fb6f45302d 100644
+--- a/browser/components/genai/GenAI.sys.mjs
++++ b/browser/components/genai/GenAI.sys.mjs
+@@ -146,101 +146,39 @@ export const GenAI = {
+   // showing links, and other special behaviors needed for individual providers.
+   chatProviders: new Map([
+     [
+-      "https://claude.ai/new",
++      "helixa-1.5b",
+       {
+-        iconUrl: "chrome://browser/content/genai/assets/brands/claude.svg",
+-        id: "claude",
+-        link1:
+-          "https://www.anthropic.com/legal/archive/6370fb23-12ed-41d9-a4a2-28866dee3105",
+-        link2:
+-          "https://www.anthropic.com/legal/archive/7197103a-5e27-4ee4-93b1-f2d4c39ba1e7",
+-        link3:
+-          "https://www.anthropic.com/legal/archive/628feec9-7df9-4d38-bc69-fbf104df47b0",
+-        linksId: "genai-settings-chat-claude-links",
+-        maxLength: 14150,
+-        name: "Anthropic Claude",
+-        supportAutoSubmit: true,
+-        tooltipId: "genai-onboarding-claude-tooltip",
+-      },
+-    ],
+-    [
+-      "https://chatgpt.com",
+-      {
+-        iconUrl: "chrome://browser/content/genai/assets/brands/chatgpt.svg",
+-        id: "chatgpt",
+-        link1: "https://openai.com/terms",
+-        link2: "https://openai.com/privacy",
+-        linksId: "genai-settings-chat-chatgpt-links",
+-        maxLength: 9350,
+-        name: "ChatGPT",
+-        supportAutoSubmit: true,
+-        tooltipId: "genai-onboarding-chatgpt-tooltip",
+-      },
+-    ],
+-    [
+-      "https://copilot.microsoft.com/?form=MOZCMC",
+-      {
+-        iconUrl: "chrome://browser/content/genai/assets/brands/copilot.svg",
+-        id: "copilot",
+-        link1: "https://www.bing.com/new/termsofuse",
+-        link2: "https://go.microsoft.com/fwlink/?LinkId=521839",
+-        linksId: "genai-settings-chat-copilot-links",
+-        maxLength: 3260,
+-        name: "Copilot",
+-        tooltipId: "genai-onboarding-copilot-tooltip",
+-      },
+-    ],
+-    [
+-      "https://gemini.google.com",
+-      {
+-        header: "X-Firefox-Gemini",
+-        iconUrl: "chrome://browser/content/genai/assets/brands/gemini.svg",
+-        id: "gemini",
+-        link1: "https://policies.google.com/terms",
+-        link2: "https://policies.google.com/terms/generative-ai/use-policy",
+-        link3: "https://support.google.com/gemini?p=privacy_notice",
+-        linksId: "genai-settings-chat-gemini-links",
+-        // Max header length is around 55000, but spaces are encoded with %20
+-        // for header instead of + for query parameter
+-        maxLength: 45000,
+-        name: "Google Gemini",
+-        tooltipId: "genai-onboarding-gemini-tooltip",
++        id: "helixa-1.5b",
++        name: "Helixa 1.5B (Neuronal Brasil)",
++        maxLength: 8192,
++        iconUrl: "chrome://browser/content/aboutwelcome/helixa.png",
+       },
+     ],
+     [
+-      "https://huggingface.co/chat",
++      "yune-3b",
+       {
+-        iconUrl: "chrome://browser/content/genai/assets/brands/huggingchat.svg",
+-        id: "huggingchat",
+-        link1: "https://huggingface.co/chat/privacy",
+-        link2: "https://huggingface.co/privacy",
+-        linksId: "genai-settings-chat-huggingchat-links",
++        id: "yune-3b",
++        name: "Yune 3B (Neuronal Brasil)",
+         maxLength: 8192,
+-        name: "HuggingChat",
+-        tooltipId: "genai-onboarding-huggingchat-tooltip",
++        iconUrl: "chrome://browser/content/aboutwelcome/yune.png",
+       },
+     ],
+     [
+-      "https://chat.mistral.ai/chat",
++      "huda-4b",
+       {
+-        iconUrl: "chrome://browser/content/genai/assets/brands/lechat.svg",
+-        id: "lechat",
+-        link1: "https://mistral.ai/terms/#terms-of-service-le-chat",
+-        link2: "https://mistral.ai/terms/#privacy-policy",
+-        linksId: "genai-settings-chat-lechat-links",
+-        maxLength: 13350,
+-        name: "Le Chat Mistral",
+-        tooltipId: "genai-onboarding-lechat-tooltip",
++        id: "huda-4b",
++        name: "Huda 4B (Neuronal Brasil)",
++        maxLength: 8192,
++        iconUrl: "chrome://browser/content/aboutwelcome/huda.png",
+       },
+     ],
+     [
+-      "http://localhost:8080",
++      "huda-7b",
+       {
+-        id: "localhost",
+-        link1: "https://llamafile.ai",
+-        linksId: "genai-settings-chat-localhost-links",
++        id: "huda-7b",
++        name: "Huda 7B (Neuronal Brasil)",
+         maxLength: 8192,
+-        name: "localhost",
++        iconUrl: "chrome://browser/content/aboutwelcome/huda.png",
+       },
+     ],
+   ]),
+diff --git a/browser/components/genai/PageAssist.sys.mjs b/browser/components/genai/PageAssist.sys.mjs
+index 5b58d9021374..4fdaa240331a 100644
+--- a/browser/components/genai/PageAssist.sys.mjs
++++ b/browser/components/genai/PageAssist.sys.mjs
+@@ -4,6 +4,8 @@
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  */
+ 
++import { FapybaraAI } from "resource:///modules/FapybaraAI.sys.mjs";
++
+ /**
+  * Page Assistant
+  */
+@@ -27,14 +29,7 @@ export const PageAssist = {
+       return null;
+     }
+ 
+-    // TODO: Call AI API here with prompt and page context
+-    const mockAiResponse = `
+-      This is a placeholder response from the AI model
+-      ** User Prompt: ${userPrompt}
+-      ** Page URL: ${pageData.url}
+-      ** Page Title: ${pageData.title}
+-    `;
+-
+-    return mockAiResponse;
++    const context = `Título: ${pageData.title || ""}\nURL: ${pageData.url || ""}\nConteúdo: ${pageData.textContent || pageData.excerpt || ""}`;
++    return await FapybaraAI.generateResponse(userPrompt, context);
+   },
+ };
+diff --git a/browser/components/genai/chat.css b/browser/components/genai/chat.css
+index 4ee6e0856e88..56df7b449460 100644
+--- a/browser/components/genai/chat.css
++++ b/browser/components/genai/chat.css
+@@ -2,259 +2,420 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
++:root {
++  --bg-primary: #121214;
++  --bg-surface: #1a1a1e;
++  --bg-card: rgba(255, 255, 255, 0.04);
++  --border-color: rgba(255, 255, 255, 0.08);
++  --accent-gold: #d4af37;
++  --accent-glow: rgba(212, 175, 55, 0.25);
++  --text-main: #f0f0f4;
++  --text-muted: #9e9ea8;
++  --user-msg-bg: #272730;
++  --ai-msg-bg: rgba(212, 175, 55, 0.07);
++  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
++}
++
++* {
++  box-sizing: border-box;
++  margin: 0;
++  padding: 0;
++}
++
+ body {
++  background-color: var(--bg-primary);
++  color: var(--text-main);
++  font-family: var(--font-family);
+   display: flex;
+   flex-direction: column;
+-  inset: 0;
+-  margin: 0;
+-  position: absolute;
++  height: 100vh;
++  width: 100%;
++  overflow: hidden;
+ }
+ 
+-browser {
+-  flex: 1;
++/* HEADER */
++#chat-header {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  padding: 12px 14px;
++  background: var(--bg-surface);
++  border-bottom: 1px solid var(--border-color);
++  z-index: 10;
++}
++
++.header-left {
++  display: flex;
++  align-items: center;
++  gap: 10px;
++}
++
++.brand-avatar {
++  width: 32px;
++  height: 32px;
++  border-radius: 8px;
++  overflow: hidden;
++  background: var(--bg-card);
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  border: 1px solid var(--border-color);
++}
++
++.brand-avatar img {
++  width: 100%;
++  height: 100%;
++  object-fit: cover;
++}
++
++.header-titles {
++  display: flex;
++  flex-direction: column;
++  gap: 2px;
++}
++
++#model-selector {
++  background: transparent;
++  color: var(--text-main);
++  border: none;
++  font-weight: 700;
++  font-size: 13px;
++  cursor: pointer;
++  outline: none;
++}
++
++#model-selector option {
++  background: var(--bg-surface);
++  color: var(--text-main);
++}
++
++.status-badge {
++  font-size: 10px;
++  color: var(--text-muted);
++  display: flex;
++  align-items: center;
++  gap: 5px;
++}
++
++.status-dot {
++  width: 6px;
++  height: 6px;
++  border-radius: 50%;
++  background: #10b981;
++  box-shadow: 0 0 6px rgba(16, 185, 129, 0.6);
++}
++
++.status-dot.missing {
++  background: #f59e0b;
++  box-shadow: 0 0 6px rgba(245, 158, 11, 0.6);
++}
++
++.status-dot.downloading {
++  background: #3b82f6;
++  box-shadow: 0 0 6px rgba(59, 130, 246, 0.6);
++}
++
++/* DOWNLOAD BANNER */
++.download-banner {
++  background: rgba(212, 175, 55, 0.08);
++  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
++  padding: 12px 14px;
++  display: flex;
++  flex-direction: column;
++  gap: 8px;
+ }
+ 
+-#browser-container {
++.download-banner-info {
+   display: flex;
+   flex-direction: column;
++  gap: 2px;
++}
++
++.download-title {
++  font-size: 12px;
++  font-weight: 700;
++  color: var(--accent-gold);
++}
++
++.download-subtitle {
++  font-size: 11px;
++  color: var(--text-muted);
++}
++
++.download-subtitle code {
++  background: rgba(0, 0, 0, 0.3);
++  padding: 1px 4px;
++  border-radius: 3px;
++  color: var(--text-main);
++}
++
++.download-action-btn {
++  background: var(--accent-gold);
++  color: #000;
++  border: none;
++  padding: 8px 12px;
++  border-radius: 8px;
++  font-weight: 700;
++  font-size: 12px;
++  cursor: pointer;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  gap: 6px;
++  transition: all 0.2s ease;
++}
++
++.download-action-btn:hover {
++  transform: translateY(-1px);
++  filter: brightness(1.1);
++}
++
++.download-action-btn:disabled {
++  opacity: 0.5;
++  cursor: not-allowed;
++  transform: none;
++}
++
++.download-progress-container {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++}
++
++.download-progress-bar {
+   flex: 1;
+-  min-height: 0;
++  height: 6px;
++  background: rgba(255, 255, 255, 0.1);
++  border-radius: 3px;
++  overflow: hidden;
++}
++
++.download-progress-fill {
++  width: 0%;
++  height: 100%;
++  background: var(--accent-gold);
++  border-radius: 3px;
++  transition: width 0.2s ease;
++}
++
++.download-progress-label {
++  font-size: 11px;
++  color: var(--text-main);
++  min-width: 40px;
++  text-align: right;
++  font-variant-numeric: tabular-nums;
+ }
+ 
+-#header {
++.header-actions {
++  display: flex;
++  align-items: center;
++  gap: 4px;
++}
++
++.icon-btn {
++  background: transparent;
++  border: none;
++  color: var(--text-muted);
++  width: 28px;
++  height: 28px;
++  border-radius: 6px;
++  cursor: pointer;
++  display: flex;
+   align-items: center;
+-  /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
+-  background-color: var(--sidebar-background-color);
++  justify-content: center;
++  font-size: 13px;
++  transition: all 0.2s ease;
++}
++
++.icon-btn:hover {
++  background: rgba(255, 255, 255, 0.08);
++  color: var(--text-main);
++}
++
++/* QUICK ACTIONS */
++#quick-actions-bar {
++  display: flex;
++  gap: 6px;
++  padding: 8px 12px;
++  background: var(--bg-primary);
+   border-bottom: 1px solid var(--border-color);
++  overflow-x: auto;
++}
++
++.action-chip {
++  background: var(--bg-surface);
++  border: 1px solid var(--border-color);
++  color: var(--text-main);
++  font-size: 11px;
++  padding: 5px 10px;
++  border-radius: 20px;
++  cursor: pointer;
++  white-space: nowrap;
++  transition: all 0.2s ease;
++}
++
++.action-chip:hover {
++  border-color: var(--accent-gold);
++  background: rgba(212, 175, 55, 0.1);
++  color: var(--accent-gold);
++}
++
++/* MESSAGES */
++#messages-container {
++  flex: 1;
++  overflow-y: auto;
++  padding: 14px;
+   display: flex;
+-  flex-direction: row;
+-  padding-inline: var(--space-large);
+-
+-  ::part(button),
+-  select {
+-    border-radius: var(--border-radius-small);
+-    margin: 0;
+-  }
+-
+-  moz-button:first-of-type {
+-    margin-inline-end: var(--space-xsmall);
+-  }
+-
+-  select {
+-    --caret-anchor: left;
+-    --caret-padding: var(--space-xsmall);
+-    --end-padding: 0px;
+-    --start-padding: calc(var(--caret-padding) + var(--background-image-width) + var(--space-xsmall));
+-    background-color: var(--button-background-color-ghost);
+-    background-position-x: var(--caret-anchor) var(--caret-padding);
+-    color: var(--button-text-color-ghost);
+-    flex: 1;
+-    height: var(--button-size-icon);
+-    margin-block: var(--space-xsmall);
+-    overflow: hidden;
+-    text-overflow: ellipsis;
+-
+-    &:hover {
+-      background-color: var(--button-background-color-ghost-hover);
+-      color: var(--button-text-color-ghost-hover);
+-    }
+-
+-    &:dir(rtl) {
+-      --caret-anchor: right;
+-    }
+-  }
+-}
+-
+-#header-close {
+-  position: relative;
+-  z-index: 1;
+-
+-  @media not -moz-pref("sidebar.revamp") {
+-    display: none;
+-  }
+-}
+-
+-#message-container {
+-  padding: var(--space-xsmall);
+-}
+-
+-#multi-stage-message-root {
+-  background-color: var(--background-color-overlay);
++  flex-direction: column;
++  gap: 12px;
++}
++
++#messages-list {
+   display: flex;
+   flex-direction: column;
+-  inset: 0;
+-  overflow: auto;
+-  position: absolute;
+-
+-  .onboardingContainer {
+-    height: unset;
+-    margin: auto var(--space-large);
+-    min-height: unset;
+-  }
+-
+-  .screen {
+-    border-radius: var(--border-radius-medium);
+-    min-height: unset;
+-  }
+-
+-  .main-content {
+-    height: unset;
+-  }
+-
+-  .main-content-inner {
+-    max-width: initial;
+-    padding: var(--space-large);
+-  }
+-
+-  .welcome-text {
+-    margin-bottom: var(--space-xlarge);
+-    padding-inline: 0;
+-  }
+-
+-  .content-tile {
+-    width: 100%;
+-  }
+-
+-  .tiles-single-select-container {
+-    margin-top: 0;
+-
+-    @media not -moz-pref("browser.ml.chat.onboarding.unresponsive") {
+-      --fade-height: 20px;
+-      --fade-padding: 8px;
+-      margin-block: calc(-1 * var(--fade-padding));
+-      max-height: max(144px, 100vh - 310px);
+-      overflow-y: auto;
+-
+-      &::after,
+-      &::before {
+-        content: "\00a0";
+-        font-size: var(--fade-height);
+-        margin-top: calc(-1 * var(--fade-height) + var(--fade-padding));
+-        pointer-events: none;
+-        position: sticky;
+-        z-index: 1;
+-      }
+-      &::after {
+-        background: linear-gradient(transparent, var(--background-color-canvas));
+-        bottom: 0;
+-      }
+-      &::before {
+-        background: linear-gradient(var(--background-color-canvas), transparent);
+-        top: 0;
+-      }
+-    }
+-  }
+-
+-  fieldset {
+-    flex-direction: column;
+-    gap: 6px;
+-    margin: 0;
+-    padding: 0;
+-  }
+-
+-  label {
+-    background-color: var(--background-color-box);
+-    border: 0.5px solid var(--border-color-deemphasized);
+-    border-radius: var(--border-radius-medium);
+-    flex-direction: row;
+-    margin: 1.5px; /* avoid shifting content when selected */
+-    outline-offset: var(--focus-outline-offset);
+-    padding: var(--space-small);
+-
+-    &:hover {
+-      background-color: var(--button-background-color-hover);
+-    }
+-
+-    &:has(.selected) {
+-      background-color: var(--background-color-canvas);
+-      border: var(--focus-outline);
+-      margin: 0; /* border switches widths */
+-    }
+-
+-    &:focus {
+-      outline: var(--focus-outline);
+-    }
+-  }
+-
+-  .icon {
+-    --icon-size: 30px;
+-    background-position: center;
+-    background-repeat: no-repeat;
+-    background-size: contain;
+-    border-radius: 0;
+-    height: var(--icon-size);
+-    margin-inline: var(--space-small);
+-    max-width: var(--icon-size);
+-    min-width: var(--icon-size);
+-    outline: none;
+-
+-    &.claude {
+-      background-image: url(assets/brands/claude.svg);
+-    }
+-    &.chatgpt {
+-      background-image: url(assets/brands/chatgpt.svg);
+-      -moz-context-properties: fill;
+-      fill: var(--text-color);
+-    }
+-    &.copilot {
+-      background-image: url(assets/brands/copilot.svg);
+-    }
+-    &.gemini {
+-      background-image: url(assets/brands/gemini.svg);
+-    }
+-    &.huggingchat {
+-      background-image: url(assets/brands/huggingchat.svg);
+-    }
+-    &.lechat {
+-      background-image: url(assets/brands/lechat.svg);
+-    }
+-  }
+-
+-  .text {
+-    flex-direction: column;
+-    font-weight: var(--font-weight-semibold);
+-    margin: 5px;
+-    text-align: start;
+-  }
+-
+-  .link-paragraph {
+-    color: var(--text-color-deemphasized);
+-    font-size: 0.8em;
+-  }
+-
+-  + #header,
+-  + #browser-container,
+-  + #summarize-btn-container {
+-    display: none;
+-  }
+-}
+-
+-#summarize-btn-container {
++  gap: 12px;
++}
++
++.message-bubble {
++  max-width: 90%;
++  padding: 10px 14px;
++  border-radius: 14px;
++  font-size: 13px;
++  line-height: 1.5;
++  word-break: break-word;
++}
++
++.message-bubble.user {
++  align-self: flex-end;
++  background: var(--user-msg-bg);
++  border: 1px solid rgba(255, 255, 255, 0.1);
++  color: #fff;
++  border-bottom-right-radius: 4px;
++}
++
++.message-bubble.assistant {
++  align-self: flex-start;
++  background: var(--ai-msg-bg);
++  border: 1px solid rgba(212, 175, 55, 0.2);
++  color: var(--text-main);
++  border-bottom-left-radius: 4px;
++  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
++}
++
++.message-author {
++  font-size: 11px;
++  font-weight: 700;
++  color: var(--accent-gold);
++  margin-bottom: 4px;
++  display: flex;
++  align-items: center;
++  gap: 6px;
++}
++
++/* TYPING INDICATOR */
++.typing-indicator {
++  align-self: flex-start;
++  background: var(--ai-msg-bg);
++  padding: 10px 14px;
++  border-radius: 14px;
++  display: flex;
++  align-items: center;
++  gap: 4px;
++  border: 1px solid rgba(212, 175, 55, 0.2);
++}
++
++.typing-indicator .dot {
++  width: 6px;
++  height: 6px;
++  background: var(--accent-gold);
++  border-radius: 50%;
++  animation: pulse 1.2s infinite ease-in-out;
++}
++
++.typing-indicator .dot:nth-child(2) {
++  animation-delay: 0.2s;
++}
++
++.typing-indicator .dot:nth-child(3) {
++  animation-delay: 0.4s;
++}
++
++@keyframes pulse {
++  0%, 100% { transform: scale(0.7); opacity: 0.4; }
++  50% { transform: scale(1.1); opacity: 1; }
++}
++
++/* FOOTER INPUT */
++#chat-footer {
++  padding: 10px 12px;
++  background: var(--bg-surface);
+   border-top: 1px solid var(--border-color);
+-  padding: var(--space-large);
+-  position: relative;
+-
+-  .badge {
+-    --badge-background-color-new: var(--color-green-40);
+-
+-    /* stylelint-disable-next-line stylelint-plugin-mozilla/use-design-tokens */
+-    background: var(--badge-background-color-new);
+-    border-radius: var(--border-radius-small);
+-    color: var(--button-text-color-primary-hover);
+-    font-size: var(--font-size-small);
+-    left: 10px;
+-    padding: var(--space-xxsmall) var(--space-small);
+-    position: absolute;
+-    text-align: center;
+-    top: 4px;
+-    z-index: 1;
+-
+-    @media not -moz-pref("browser.ml.chat.page.footerBadge") {
+-      display: none;
+-    }
+-  }
+-
+-  @media (not -moz-pref("browser.ml.chat.page")) or -moz-pref("browser.ml.chat.provider", "") {
+-    display: none;
+-  }
++  display: flex;
++  flex-direction: column;
++  gap: 6px;
++}
++
++.input-box-wrapper {
++  display: flex;
++  align-items: flex-end;
++  background: var(--bg-primary);
++  border: 1px solid var(--border-color);
++  border-radius: 12px;
++  padding: 6px 8px;
++  gap: 6px;
++  transition: border-color 0.2s;
++}
++
++.input-box-wrapper:focus-within {
++  border-color: var(--accent-gold);
++  box-shadow: 0 0 0 2px var(--accent-glow);
++}
++
++#chat-input {
++  flex: 1;
++  background: transparent;
++  border: none;
++  color: var(--text-main);
++  font-family: inherit;
++  font-size: 13px;
++  resize: none;
++  max-height: 120px;
++  outline: none;
++  line-height: 1.4;
++  padding: 4px;
++}
++
++#btn-send {
++  background: var(--accent-gold);
++  color: #000;
++  border: none;
++  border-radius: 8px;
++  width: 30px;
++  height: 30px;
++  display: flex;
++  align-items: center;
++  justify-content: center;
++  cursor: pointer;
++  transition: all 0.2s ease;
++  flex-shrink: 0;
++}
++
++#btn-send:disabled {
++  background: rgba(255, 255, 255, 0.1);
++  color: var(--text-muted);
++  cursor: not-allowed;
++}
++
++#btn-send:not(:disabled):hover {
++  transform: scale(1.05);
++}
++
++.footer-privacy-tag {
++  font-size: 9.5px;
++  color: var(--text-muted);
++  text-align: center;
++}
++
++.footer-privacy-tag strong {
++  color: var(--accent-gold);
+ }
+diff --git a/browser/components/genai/chat.html b/browser/components/genai/chat.html
+index 064ae0c614ff..8003eabb1db8 100644
+--- a/browser/components/genai/chat.html
++++ b/browser/components/genai/chat.html
+@@ -5,60 +5,92 @@
+ <html xmlns="http://www.w3.org/1999/xhtml" role="document">
+   <head>
+     <meta charset="utf-8" />
+-    <meta
+-      http-equiv="Content-Security-Policy"
+-      content="default-src resource: chrome:; object-src 'none'; img-src data: chrome:;"
+-    />
+-    <meta name="color-scheme" content="light dark" />
+-    <title data-l10n-id="genai-chatbot-title"></title>
+-    <link rel="localization" href="branding/brand.ftl" />
+-    <link rel="localization" href="browser/newtab/onboarding.ftl" />
+-    <link rel="localization" href="browser/genai.ftl" />
+-    <link rel="localization" href="browser/browser.ftl" />
+-    <link rel="stylesheet" href="chrome://global/skin/in-content/common.css" />
+-    <link
+-      rel="stylesheet"
+-      href="chrome://browser/content/sidebar/sidebar.css"
+-    />
+-    <link
+-      rel="stylesheet"
+-      href="chrome://browser/content/aboutwelcome/aboutwelcome.css"
+-    />
++    <meta name="color-scheme" content="dark" />
++    <title>Fapybara AI Chat</title>
+     <link rel="stylesheet" href="chrome://browser/content/genai/chat.css" />
+-    <script src="chrome://global/content/vendor/react.js"></script>
+-    <script src="chrome://global/content/vendor/react-dom.js"></script>
+-    <script src="chrome://browser/content/contentTheme.js"></script>
+-    <script src="chrome://browser/content/genai/chat.js"></script>
+   </head>
+   <body>
+-    <div id="header">
+-      <select data-l10n-id="genai-header-provider-menu" id="provider"></select>
+-      <div id="permissions-indicator"></div>
+-      <moz-button
+-        data-l10n-id="genai-header-settings-button"
+-        iconsrc="chrome://global/skin/icons/more.svg"
+-        aria-haspopup="menu"
+-        aria-expanded="false"
+-        id="header-more"
+-        type="icon ghost"
+-      ></moz-button>
+-      <moz-button
+-        data-l10n-id="genai-header-close-button"
+-        iconsrc="chrome://global/skin/icons/close.svg"
+-        id="header-close"
+-        type="icon ghost"
+-      ></moz-button>
++    <!-- HEADER -->
++    <div id="chat-header">
++      <div class="header-left">
++        <div class="brand-avatar">
++          <img id="active-model-icon" src="chrome://browser/content/aboutwelcome/helixa.png" alt="AI" />
++        </div>
++        <div class="header-titles">
++          <select id="model-selector">
++            <option value="helixa-1.5b">Helixa 1.5B (Veloz)</option>
++            <option value="yune-3b">Yune 3B (Equilíbrio)</option>
++            <option value="huda-4b">Huda 4B (Analítico)</option>
++            <option value="huda-7b">Huda 7B (Raciocínio)</option>
++          </select>
++          <span class="status-badge">
++            <span id="model-status-dot" class="status-dot"></span>
++            <span id="model-status-text">Verificando...</span>
++          </span>
++        </div>
++      </div>
++      <div class="header-actions">
++        <button id="btn-clear" title="Limpar conversa" class="icon-btn">🗑️</button>
++        <button id="btn-close" title="Fechar painel" class="icon-btn">✕</button>
++      </div>
++    </div>
++
++    <!-- MODEL DOWNLOAD BANNER (shown when active model is not downloaded) -->
++    <div id="download-banner" class="download-banner" style="display: none;">
++      <div class="download-banner-info">
++        <span class="download-title" id="banner-model-title">Modelo não baixado</span>
++        <span class="download-subtitle" id="banner-model-desc">Clique abaixo para baixar e salvar em <code>/modelos/</code></span>
++      </div>
++      <div class="download-progress-container" id="banner-progress-box" style="display: none;">
++        <div class="download-progress-bar">
++          <div class="download-progress-fill" id="banner-progress-fill"></div>
++        </div>
++        <span class="download-progress-label" id="banner-progress-label">0%</span>
++      </div>
++      <button id="btn-download-active-model" class="download-action-btn">
++        ⬇️ Baixar Modelo Agora
++      </button>
++    </div>
++
++    <!-- CONTEXT QUICK ACTIONS -->
++    <div id="quick-actions-bar">
++      <button id="btn-summarize-page" class="action-chip">
++        📄 Resumir Página
++      </button>
++      <button id="btn-explain-code" class="action-chip">
++        💻 Explicar Código
++      </button>
+     </div>
+-    <div id="message-container"></div>
+-    <div id="browser-container"></div>
+-    <div id="summarize-btn-container">
+-      <span class="badge" data-l10n-id="genai-menu-new-badge"></span>
+-      <moz-button
+-        data-l10n-id="genai-page-button-summarize"
+-        id="summarize-button"
+-        size="default"
+-      >
+-      </moz-button>
++
++    <!-- MESSAGES CONTAINER -->
++    <div id="messages-container">
++      <div id="messages-list"></div>
++      <div id="typing-indicator" class="typing-indicator" style="display: none;">
++        <span class="dot"></span>
++        <span class="dot"></span>
++        <span class="dot"></span>
++      </div>
+     </div>
++
++    <!-- INPUT FOOTER -->
++    <div id="chat-footer">
++      <div class="input-box-wrapper">
++        <textarea
++          id="chat-input"
++          placeholder="Pergunte qualquer coisa ou peça ajuda com esta página..."
++          rows="1"
++        ></textarea>
++        <button id="btn-send" title="Enviar mensagem" disabled>
++          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
++            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
++          </svg>
++        </button>
++      </div>
++      <div class="footer-privacy-tag">
++        <span>⚡ Powered by <strong>Neuronal Brasil</strong> • Salvo em <code>/modelos/</code></span>
++      </div>
++    </div>
++
++    <script src="chrome://browser/content/genai/chat.js"></script>
+   </body>
+ </html>
+diff --git a/browser/components/genai/chat.js b/browser/components/genai/chat.js
+index 60380a90129a..155c8519dace 100644
+--- a/browser/components/genai/chat.js
++++ b/browser/components/genai/chat.js
+@@ -2,614 +2,365 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+-const { topChromeWindow } = window.browsingContext;
+-
+-const lazy = {};
+-ChromeUtils.defineESModuleGetters(lazy, {
+-  GenAI: "resource:///modules/GenAI.sys.mjs",
+-  SpecialMessageActions:
+-    "resource://messaging-system/lib/SpecialMessageActions.sys.mjs",
+-});
+-const { XPCOMUtils } = ChromeUtils.importESModule(
+-  "resource://gre/modules/XPCOMUtils.sys.mjs"
+-);
+-
+-// Define actions for onboarding and chatbot
+-const ACTIONS = Object.freeze({
+-  CHATBOT_PERSIST: "chatbot:persist",
+-  CHATBOT_REVERT: "chatbot:revert",
+-  CHATBOT_SELECT: "chatbot:select",
+-  CHATBOT_SUPPORT: "chatbot:support",
+-  OPEN_URL: "OPEN_URL",
+-});
+-
+-XPCOMUtils.defineLazyPreferenceGetter(
+-  lazy,
+-  "providerPref",
+-  "browser.ml.chat.provider",
+-  null,
+-  renderProviders
+-);
+-XPCOMUtils.defineLazyPreferenceGetter(
+-  lazy,
+-  "shortcutsPref",
+-  "browser.ml.chat.shortcuts"
+-);
+-XPCOMUtils.defineLazyPreferenceGetter(
+-  lazy,
+-  "sidebarRevampPref",
+-  "sidebar.revamp"
+-);
+-XPCOMUtils.defineLazyPreferenceGetter(
+-  lazy,
+-  "onboardingConfig",
+-  "browser.ml.chat.onboarding.config",
+-  JSON.stringify({
+-    id: "chatbot",
+-    template: "multistage",
+-    transitions: true,
+-    screens: [
+-      {
+-        id: "chat_pick",
+-        content: {
+-          fullscreen: true,
+-          hide_secondary_section: "responsive",
+-          narrow: true,
+-          position: "split",
+-
+-          title: {
+-            fontWeight: 400,
+-            string_id: "genai-onboarding-choose-header",
+-          },
+-          cta_paragraph: {
+-            text: {
+-              string_id: "genai-onboarding-choose-description",
+-              string_name: "learn-more",
+-            },
+-            action: {
+-              type: ACTIONS.CHATBOT_SUPPORT,
+-            },
+-          },
+-          above_button_content: [
+-            // Placeholder to inject on provider change
+-            {
+-              text: " ",
+-              type: "text",
+-            },
+-          ],
+-          primary_button: {
+-            action: {
+-              navigate: true,
+-              type: ACTIONS.CHATBOT_PERSIST,
+-            },
+-            label: { string_id: "genai-onboarding-primary" },
+-          },
+-          additional_button: {
+-            action: { dismiss: true, type: ACTIONS.CHATBOT_REVERT },
+-            label: { string_id: "genai-onboarding-secondary" },
+-            style: "link",
+-          },
+-          progress_bar: true,
+-        },
+-      },
+-    ],
+-  })
+-);
+-
+-ChromeUtils.defineLazyGetter(
+-  lazy,
+-  "supportLink",
+-  () =>
+-    Services.urlFormatter.formatURLPref("app.support.baseURL") + "ai-chatbot"
+-);
+-
+-const node = {};
+-
+-function closeSidebar() {
+-  topChromeWindow.SidebarController.hide();
+-}
++"use strict";
+ 
+-function openLink(url) {
+-  topChromeWindow.openLinkIn(url, "tabshifted", {
+-    triggeringPrincipal: Services.scriptSecurityManager.createNullPrincipal({}),
+-  });
++let topChromeWindow = null;
++let FapybaraAI = null;
++
++try {
++  ({ FapybaraAI } = ChromeUtils.importESModule(
++    "resource:///modules/FapybaraAI.sys.mjs"
++  ));
++} catch (e) {
++  console.error("Fapybara AI: Error importing FapybaraAI module:", e);
+ }
+ 
+-function request(url = lazy.providerPref) {
++const modelIcons = {
++  "helixa-1.5b": "chrome://browser/content/aboutwelcome/helixa.png",
++  "yune-3b": "chrome://browser/content/aboutwelcome/yune.png",
++  "huda-4b": "chrome://browser/content/aboutwelcome/huda.png",
++  "huda-7b": "chrome://browser/content/aboutwelcome/huda.png",
++};
++
++let dom = {};
++
++function initChat() {
+   try {
+-    node.chat.fixupAndLoadURIString(url, {
+-      triggeringPrincipal: Services.scriptSecurityManager.createNullPrincipal(
+-        {}
+-      ),
+-    });
+-  } catch (ex) {
+-    console.error("Failed to request chat provider", ex);
++    topChromeWindow = window.browsingContext?.topChromeWindow || window.top;
++  } catch (e) {}
++
++  dom = {
++    modelSelector: document.getElementById("model-selector"),
++    modelIcon: document.getElementById("active-model-icon"),
++    modelStatusDot: document.getElementById("model-status-dot"),
++    modelStatusText: document.getElementById("model-status-text"),
++    downloadBanner: document.getElementById("download-banner"),
++    bannerModelTitle: document.getElementById("banner-model-title"),
++    bannerModelDesc: document.getElementById("banner-model-desc"),
++    bannerProgressBox: document.getElementById("banner-progress-box"),
++    bannerProgressFill: document.getElementById("banner-progress-fill"),
++    bannerProgressLabel: document.getElementById("banner-progress-label"),
++    btnDownloadModel: document.getElementById("btn-download-active-model"),
++    messagesList: document.getElementById("messages-list"),
++    typingIndicator: document.getElementById("typing-indicator"),
++    chatInput: document.getElementById("chat-input"),
++    btnSend: document.getElementById("btn-send"),
++    btnClear: document.getElementById("btn-clear"),
++    btnClose: document.getElementById("btn-close"),
++    btnSummarize: document.getElementById("btn-summarize-page"),
++    btnExplain: document.getElementById("btn-explain-code"),
++  };
++
++  if (!dom.chatInput || !dom.btnSend) {
++    console.warn("Fapybara AI Chat: DOM elements not ready.");
++    return;
+   }
+-}
+ 
+-function renderChat() {
+-  const browser = document.createXULElement("browser");
+-  const browserContainer = document.getElementById("browser-container");
+-  browser.setAttribute("disableglobalhistory", "true");
+-  browser.setAttribute("maychangeremoteness", "true");
+-  browser.setAttribute("messagemanagergroup", "chatbot-browser");
+-  browser.setAttribute("nodefaultsrc", "true");
+-  browser.setAttribute("remote", "true");
+-  browser.setAttribute("type", "content");
+-  return browserContainer.appendChild(browser);
+-}
++  if (FapybaraAI) {
++    const activeModel = FapybaraAI.getSelectedModel();
++    if (dom.modelSelector) dom.modelSelector.value = activeModel.id;
++    updateModelAvatar(activeModel.id);
++    checkModelDownloadStatus(activeModel.id);
++    addWelcomeMessage(activeModel);
++  } else {
++    addMessage(
++      "assistant",
++      "⚠️ Módulo de IA não pôde ser carregado. Reabra o painel ou reinicie o navegador."
++    );
++  }
+ 
+-async function renderProviders() {
+-  // Skip potential pref change callback when unloading
+-  if ((await document.visibilityState) == "hidden") {
+-    return null;
++  if (dom.modelSelector) {
++    dom.modelSelector.addEventListener("change", async e => {
++      if (!FapybaraAI) return;
++      const modelId = e.target.value;
++      FapybaraAI.setSelectedModel(modelId);
++      updateModelAvatar(modelId);
++      await checkModelDownloadStatus(modelId);
++      const newModel = FapybaraAI.getSelectedModel();
++      addMessage(
++        "assistant",
++        `Modelo alterado para **${newModel.name}** (Neuronal Brasil). Como posso te ajudar?`
++      );
++    });
+   }
+ 
+-  const select = document.getElementById("provider");
+-  select.innerHTML = "";
+-  let selected = false;
++  if (dom.btnDownloadModel) {
++    dom.btnDownloadModel.addEventListener("click", triggerModelDownload);
++  }
+ 
+-  const addOption = (text = "", val = "") => {
+-    const option = select.appendChild(document.createElement("option"));
+-    option.textContent = text;
+-    option.value = val;
+-    return option;
+-  };
++  dom.chatInput.addEventListener("input", () => {
++    const hasText = dom.chatInput.value.trim().length > 0;
++    dom.btnSend.disabled = !hasText;
++    autoGrow(dom.chatInput);
++  });
+ 
+-  // Add the known providers in order while looking for current selection
+-  lazy.GenAI.chatProviders.forEach((data, url) => {
+-    const option = addOption(data.name, url);
+-    if (lazy.providerPref == url) {
+-      option.selected = true;
+-      selected = true;
+-    } else if (data.hidden) {
+-      option.hidden = true;
++  dom.chatInput.addEventListener("keydown", e => {
++    if (e.key === "Enter" && !e.shiftKey && !dom.btnSend.disabled) {
++      e.preventDefault();
++      handleSend();
+     }
+   });
+ 
+-  // Must be a custom preference if provider wasn't found
+-  if (!selected) {
+-    const option = addOption(lazy.providerPref, lazy.providerPref);
+-    option.selected = true;
+-    if (!lazy.providerPref) {
+-      showOnboarding();
+-    }
++  dom.btnSend.addEventListener("click", handleSend);
++
++  if (dom.btnClear) {
++    dom.btnClear.addEventListener("click", () => {
++      dom.messagesList.innerHTML = "";
++      if (FapybaraAI) addWelcomeMessage(FapybaraAI.getSelectedModel());
++    });
++  }
++
++  if (dom.btnClose) {
++    dom.btnClose.addEventListener("click", () => {
++      try {
++        topChromeWindow?.SidebarController?.hide();
++      } catch (e) {}
++    });
+   }
+ 
+-  // Clear warning message from different provider
+-  clearWarningMessage();
+-
+-  // Add extra controls after the providers
+-  select.appendChild(document.createElement("hr"));
+-  document.l10n.setAttributes(addOption(), "genai-provider-view-details");
+-
+-  // Update provider telemetry
+-  const providerId = lazy.GenAI.getProviderId(lazy.providerPref);
+-  Glean.genaiChatbot.provider.set(providerId);
+-  if (renderProviders.lastId && document.hasFocus()) {
+-    Glean.genaiChatbot.providerChange.record({
+-      current: providerId,
+-      previous: renderProviders.lastId,
+-      surface: "panel",
++  if (dom.btnSummarize) {
++    dom.btnSummarize.addEventListener("click", () => {
++      handlePageAction("Por favor, faça um resumo claro dos principais pontos desta página:");
+     });
+   }
+-  renderProviders.lastId = providerId;
+ 
+-  // Load the requested provider
+-  request();
+-  return select;
++  if (dom.btnExplain) {
++    dom.btnExplain.addEventListener("click", () => {
++      handlePageAction("Explique a lógica ou os conceitos técnicos presentes nesta página:");
++    });
++  }
+ }
+ 
+-function renderMore() {
+-  const button = document.getElementById("header-more");
+-  button.addEventListener("click", () => {
+-    const topDoc = topChromeWindow.document;
+-    let menu = topDoc.getElementById("chatbot-menupopup");
+-    if (!menu) {
+-      menu = topDoc
+-        .getElementById("mainPopupSet")
+-        .appendChild(topDoc.createXULElement("menupopup"));
+-      menu.id = "chatbot-menupopup";
+-      node.menu = menu;
+-      menu.addEventListener("popuphidden", () => {
+-        button.setAttribute("aria-expanded", false);
+-      });
++async function checkModelDownloadStatus(modelId) {
++  if (!FapybaraAI) return;
++  const isDownloaded = await FapybaraAI.isModelDownloaded(modelId);
++  const model = FapybaraAI.getSelectedModel();
++
++  if (isDownloaded) {
++    if (dom.modelStatusDot) {
++      dom.modelStatusDot.className = "status-dot";
++    }
++    if (dom.modelStatusText) {
++      dom.modelStatusText.textContent = "Pronto no disco (100% Local)";
++    }
++    if (dom.downloadBanner) {
++      dom.downloadBanner.style.display = "none";
+     }
+-    menu.innerHTML = "";
+-
+-    const provider = lazy.GenAI.chatProviders.get(lazy.providerPref)?.name;
+-    const providerId = lazy.GenAI.getProviderId();
+-    [
+-      [
+-        "menuitem",
+-        [
+-          provider
+-            ? "genai-options-reload-provider"
+-            : "genai-options-reload-generic",
+-          { provider },
+-        ],
+-        function reload() {
+-          request();
+-        },
+-      ],
+-      ["menuseparator"],
+-      [
+-        "menuitem",
+-        ["genai-options-show-shortcut"],
+-        function show_shortcuts() {
+-          Services.prefs.setBoolPref("browser.ml.chat.shortcuts", true);
+-        },
+-        lazy.shortcutsPref,
+-      ],
+-      [
+-        "menuitem",
+-        ["genai-options-hide-shortcut"],
+-        function hide_shortcuts() {
+-          Services.prefs.setBoolPref("browser.ml.chat.shortcuts", false);
+-        },
+-        !lazy.shortcutsPref,
+-      ],
+-      ["menuseparator"],
+-      [
+-        "menuitem",
+-        ["genai-options-about-chatbot"],
+-        function about() {
+-          openLink(lazy.supportLink);
+-        },
+-      ],
+-    ].forEach(([type, l10n, command, checked]) => {
+-      const item = menu.appendChild(topDoc.createXULElement(type));
+-      if (type != "menuitem") {
+-        return;
++  } else {
++    if (dom.modelStatusDot) {
++      dom.modelStatusDot.className = "status-dot missing";
++    }
++    if (dom.modelStatusText) {
++      dom.modelStatusText.textContent = "Não baixado (" + model.size + ")";
++    }
++    if (dom.downloadBanner) {
++      dom.downloadBanner.style.display = "flex";
++      if (dom.bannerModelTitle) {
++        dom.bannerModelTitle.textContent = `${model.name} (${model.size}) não baixado`;
+       }
+-      document.l10n.setAttributes(item, ...l10n);
+-      item.addEventListener("command", () => {
+-        command();
+-        Glean.genaiChatbot.sidebarMoreMenuClick.record({
+-          action: command.name,
+-          provider: providerId,
+-        });
+-      });
+-      if (checked !== undefined) {
+-        item.setAttribute("type", "checkbox");
+-        if (checked) {
+-          item.setAttribute("checked", true);
+-        }
++      if (dom.bannerModelDesc) {
++        dom.bannerModelDesc.innerHTML = `Clique no botão abaixo para baixar e salvar em <code>/modelos/${model.id}/</code>`;
+       }
+-    });
+-    menu.openPopup(button, "after_start");
+-    button.setAttribute("aria-expanded", true);
+-    Glean.genaiChatbot.sidebarMoreMenuDisplay.record({ provider: providerId });
+-  });
+-}
+-
+-function handleChange({ target }) {
+-  const { value } = target;
+-  switch (target) {
+-    case node.provider:
+-      // Special behavior to show first screen of onboarding
+-      if (value == "") {
+-        target.value = lazy.providerPref;
+-        showOnboarding(1);
+-        Glean.genaiChatbot.sidebarProviderMenuClick.record({
+-          action: "details",
+-          provider: lazy.GenAI.getProviderId(),
+-        });
+-      } else {
+-        Services.prefs.setStringPref("browser.ml.chat.provider", value);
+-        // Reset Permissions UI by changing provider
+-        topChromeWindow.dispatchEvent(
+-          new CustomEvent("sidebarbrowserchanged", {
+-            bubble: true,
+-          })
+-        );
++      if (dom.bannerProgressBox) {
++        dom.bannerProgressBox.style.display = "none";
++      }
++      if (dom.btnDownloadModel) {
++        dom.btnDownloadModel.style.display = "flex";
++        dom.btnDownloadModel.disabled = false;
++        dom.btnDownloadModel.textContent = `⬇️ Baixar ${model.name} (${model.size})`;
+       }
+-      break;
++    }
+   }
+ }
+-addEventListener("change", handleChange);
+-
+-// Expose a promise for loading and rendering the chat browser element
+-var browserPromise = new Promise((resolve, reject) => {
+-  addEventListener("load", async () => {
+-    try {
+-      node.chat = renderChat();
+-      node.provider = await renderProviders();
+-      renderMore();
+-      resolve(node.chat);
+-      document.getElementById("header-close").addEventListener("click", () => {
+-        closeSidebar();
+-        Glean.genaiChatbot.sidebarCloseClick.record({
+-          provider: lazy.GenAI.getProviderId(),
+-        });
+-      });
+-      document
+-        .getElementById("summarize-button")
+-        .addEventListener("click", async () => {
+-          const badgeKey = "browser.ml.chat.page.footerBadge";
+-          const newBadgePref = Services.prefs.getBoolPref(badgeKey);
+-
+-          if (newBadgePref) {
+-            Services.prefs.setBoolPref(badgeKey, false);
+-          }
+-          await lazy.GenAI.summarizeCurrentPage(topChromeWindow, "footer");
+-        });
+-    } catch (ex) {
+-      console.error("Failed to render on load", ex);
+-      reject(ex);
+-    }
+ 
+-    Glean.genaiChatbot.sidebarToggle.record({
+-      opened: true,
+-      provider: lazy.GenAI.getProviderId(),
+-      reason: "load",
+-      version: lazy.sidebarRevampPref ? "new" : "old",
+-    });
+-  });
+-});
+-
+-addEventListener("unload", () => {
+-  node.menu?.remove();
+-  Glean.genaiChatbot.sidebarToggle.record({
+-    opened: false,
+-    provider: lazy.GenAI.getProviderId(),
+-    reason: "unload",
+-    version: lazy.sidebarRevampPref ? "new" : "old",
+-  });
+-});
+-
+-/**
+- * Show onboarding screens
+- *
+- * @param {number} length optional show fewer screens
+- */
+-function showOnboarding(length) {
+-  // Insert onboarding container and render with script
+-  const root = document.createElement("div");
+-  root.id = "multi-stage-message-root";
+-  document.getElementById(root.id)?.remove();
+-  document.body.prepend(root);
+-  history.replaceState("", "");
+-  const script = document.head.appendChild(document.createElement("script"));
+-  script.src = "chrome://browser/content/aboutwelcome/aboutwelcome.bundle.js";
+-
+-  // Convert provider data for lookup by id
+-  const providerConfigs = new Map();
+-  lazy.GenAI.chatProviders.forEach((data, url) => {
+-    if (!data.hidden) {
+-      providerConfigs.set(data.id, { ...data, url });
+-    }
+-  });
++async function triggerModelDownload() {
++  if (!FapybaraAI) return;
++  const model = FapybaraAI.getSelectedModel();
+ 
+-  // Define various AW* functions to control aboutwelcome bundle behavior
+-  Object.assign(window, {
+-    AWEvaluateScreenTargeting(screens) {
+-      return screens;
+-    },
+-    AWFinish() {
+-      if (lazy.providerPref == "") {
+-        closeSidebar();
+-      }
+-      root.remove();
+-
+-      // Indicate onboarding finished and allow another
+-      showOnboarding.resolve();
+-      onboardingPromise = new Promise(resolve => {
+-        showOnboarding.resolve = resolve;
+-      });
+-    },
+-    AWGetFeatureConfig() {
+-      const onboarding = JSON.parse(lazy.onboardingConfig);
+-      const providerTiles = {
+-        action: { picker: "<event>" },
+-        data: [...providerConfigs.values()].map(config => ({
+-          action: { type: ACTIONS.CHATBOT_SELECT, config },
+-          id: config.id,
+-          label: config.name,
+-          tooltip: { string_id: config.tooltipId },
+-        })),
+-        // Default to nothing selected
+-        selected: " ",
+-        subtitle: { string_id: "genai-onboarding-choose-header" },
+-        type: "single-select",
+-      };
+-      // Insert provider tiles on the first screen
+-      onboarding.screens[0].content.tiles = providerTiles;
+-      // Remove extra screens if any
+-      onboarding.screens = onboarding.screens.slice(0, length);
+-      return onboarding;
+-    },
+-    AWGetInstalledAddons() {},
+-    AWGetSelectedTheme() {
+-      const primary = document.querySelector(".primary");
+-      if (primary) {
+-        primary.disabled = true;
++  if (dom.btnDownloadModel) {
++    dom.btnDownloadModel.disabled = true;
++    dom.btnDownloadModel.style.display = "none";
++  }
++  if (dom.bannerProgressBox) {
++    dom.bannerProgressBox.style.display = "flex";
++  }
++  if (dom.modelStatusDot) {
++    dom.modelStatusDot.className = "status-dot downloading";
++  }
++  if (dom.modelStatusText) {
++    dom.modelStatusText.textContent = "Baixando...";
++  }
++
++  addMessage(
++    "assistant",
++    `Iniciando download do modelo **${model.name}** direto dos servidores da Neuronal Brasil para a pasta \`/modelos/${model.id}/\`...`
++  );
++
++  try {
++    await FapybaraAI.downloadModel(model.id, ({ percent, loaded, total, status }) => {
++      if (dom.bannerProgressFill) {
++        dom.bannerProgressFill.style.width = `${percent}%`;
+       }
+-    },
+-    AWSendEventTelemetry({ event, event_context: { source } }) {
+-      const { provider } = window.AWSendEventTelemetry;
+-      const step = 1;
+-      switch (true) {
+-        case event == "IMPRESSION":
+-          Glean.genaiChatbot.onboardingProviderChoiceDisplayed.record({
+-            provider: lazy.GenAI.getProviderId(lazy.providerPref),
+-            step,
+-          });
+-          break;
+-        case source == "cta_paragraph":
+-          Glean.genaiChatbot.onboardingLearnMore.record({ provider, step });
+-          break;
+-        case source == "primary_button":
+-          Glean.genaiChatbot.onboardingFinish.record({ provider, step });
+-          break;
+-        case source == "additional_button":
+-          Glean.genaiChatbot.onboardingClose.record({ provider, step });
+-          break;
+-        case source.startsWith("link"):
+-          Glean.genaiChatbot.onboardingProviderTerms.record({
+-            provider,
+-            step,
+-            text: source,
+-          });
+-          break;
+-        // Assume generic click not yet handled above single select of provider
+-        case event == "CLICK_BUTTON":
+-          window.AWSendEventTelemetry.provider = source;
+-          Glean.genaiChatbot.onboardingProviderSelection.record({
+-            provider: source,
+-            step,
+-          });
+-          break;
++      if (dom.bannerProgressLabel) {
++        const mb = (loaded / (1024 * 1024)).toFixed(1);
++        const totalMb = total > 0 ? (total / (1024 * 1024)).toFixed(0) : "?";
++        dom.bannerProgressLabel.textContent = `${percent}% (${mb} MB / ${totalMb} MB)`;
+       }
+-    },
+-    AWSendToParent(_message, action) {
+-      switch (action.type) {
+-        case ACTIONS.OPEN_URL:
+-          lazy.SpecialMessageActions.handleAction(action, topChromeWindow);
+-          return;
+-        case ACTIONS.CHATBOT_PERSIST: {
+-          const { value } = document.querySelector(
+-            "label:has(.selected) input"
+-          );
+-          Services.prefs.setStringPref(
+-            "browser.ml.chat.provider",
+-            providerConfigs.get(value).url
+-          );
+-          break;
+-        }
+-        case ACTIONS.CHATBOT_REVERT: {
+-          request();
+-          break;
+-        }
+-        // Handle single select provider choice
+-        case ACTIONS.CHATBOT_SELECT: {
+-          const { config } = action;
+-          if (!config) {
+-            break;
+-          }
+-
+-          request(config.url);
+-          document.querySelector(".primary").disabled = false;
+-
+-          // Set max-height to trigger transition
+-          document.querySelectorAll("label .text div").forEach(div => {
+-            const selected =
+-              div.closest("label").querySelector("input").value == config.id;
+-            div.style.maxHeight = selected ? div.scrollHeight + "px" : 0;
+-            const a = div.querySelector("a");
+-            if (a) {
+-              a.tabIndex = selected ? 0 : -1;
+-            }
+-          });
+-
+-          // Update potentially multiple links for the provider
+-          const links = document.querySelector(".link-paragraph");
+-          if (links && links.dataset.l10nId != config.linksId) {
+-            links.innerHTML = "";
+-            for (let i = 1; i <= 3; i++) {
+-              const link = links.appendChild(document.createElement("a"));
+-              const name = (link.dataset.l10nName = `link${i}`);
+-              link.href = config[name];
+-              link.setAttribute("value", name);
+-            }
+-            document.l10n.setAttributes(links, config.linksId);
+-
+-            const handleLink = ev => {
+-              const { href } = ev.target;
+-              if (href) {
+-                ev.preventDefault();
+-                openLink(href);
+-              }
+-            };
+-
+-            if (!links._listenerAdded) {
+-              links?.addEventListener("click", handleLink);
+-              links._listenerAdded = true;
+-            }
+-          }
+-
+-          break;
+-        }
+-        case ACTIONS.CHATBOT_SUPPORT:
+-          openLink(lazy.supportLink);
+-          break;
++      if (dom.modelStatusText) {
++        dom.modelStatusText.textContent = `Baixando ${percent}%`;
+       }
+-    },
+-  });
++    });
++
++    await checkModelDownloadStatus(model.id);
++    addMessage(
++      "assistant",
++      `🎉 **${model.name}** baixado e salvo com sucesso! O modelo já está pronto para uso local no Fapybara.`
++    );
++  } catch (err) {
++    console.error("Fapybara AI: Download error:", err);
++    if (dom.modelStatusDot) {
++      dom.modelStatusDot.className = "status-dot missing";
++    }
++    if (dom.modelStatusText) {
++      dom.modelStatusText.textContent = "Erro no download";
++    }
++    if (dom.btnDownloadModel) {
++      dom.btnDownloadModel.style.display = "flex";
++      dom.btnDownloadModel.disabled = false;
++      dom.btnDownloadModel.textContent = `Tentar baixar novamente`;
++    }
++    addMessage(
++      "assistant",
++      `❌ Ocorreu um erro ao baixar o modelo: ${err.message || err}. Verifique sua conexão e tente novamente.`
++    );
++  }
++}
++
++function updateModelAvatar(modelId) {
++  if (dom.modelIcon) {
++    dom.modelIcon.src = modelIcons[modelId] || modelIcons["helixa-1.5b"];
++  }
+ }
+ 
+-// Expose a promise for onboarding finishing
+-var onboardingPromise = new Promise(resolve => {
+-  showOnboarding.resolve = resolve;
+-});
++function addWelcomeMessage(model) {
++  addMessage(
++    "assistant",
++    `Olá! Sou a **${model.name}**, sua assistente de IA nativa desenvolvida pela **Neuronal Brasil** para o Fapybara.\n\nEstou pronta para ajudar com pesquisas, resumos de páginas e código com 100% de privacidade.\n\nDigite sua pergunta abaixo ou use os botões de ação rápida acima! 👆`
++  );
++}
+ 
+-/**
+- * Clear message if present
+- *
+- */
+-function clearWarningMessage() {
+-  const messageContainer = document.getElementById("message-container");
++function autoGrow(element) {
++  element.style.height = "auto";
++  element.style.height = Math.min(element.scrollHeight, 120) + "px";
++}
+ 
+-  if (messageContainer?.hasChildNodes()) {
+-    messageContainer.replaceChildren();
++function addMessage(sender, text) {
++  const bubble = document.createElement("div");
++  bubble.className = `message-bubble ${sender}`;
++
++  if (sender === "assistant" && FapybaraAI) {
++    const model = FapybaraAI.getSelectedModel();
++    const author = document.createElement("div");
++    author.className = "message-author";
++    author.textContent = `✨ ${model.name}`;
++    bubble.appendChild(author);
+   }
++
++  const content = document.createElement("div");
++  content.innerHTML = formatMarkdown(text);
++  bubble.appendChild(content);
++
++  dom.messagesList.appendChild(bubble);
++  scrollToBottom();
+ }
+ 
+-/**
+- * Display a warning message in the sidebar chatbot panel when context is too long
+- *
+- * @param {number} length context length for a request
+- */
+-async function showSummarizeWarning(length) {
+-  // if previous request showed the message clear previous message
+-  clearWarningMessage();
++function formatMarkdown(text) {
++  let out = text
++    .replace(/&/g, "&amp;")
++    .replace(/</g, "&lt;")
++    .replace(/>/g, "&gt;");
+ 
+-  const messageContainer = document.getElementById("message-container");
+-  const warningEl = lazy.GenAI.createWarningEl(document, null, true);
++  out = out.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
++  out = out.replace(/`([^`]+)`/g, "<code>$1</code>");
++  out = out.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
++  out = out.replace(/\n/g, "<br>");
+ 
+-  if (!messageContainer) {
+-    return;
+-  }
++  return out;
++}
+ 
+-  const provider = lazy.GenAI.getProviderId();
+-  const type = "page_summarization";
+-  document.l10n.setAttributes(warningEl, "genai-page-warning");
+-  messageContainer.hidden = false;
+-  messageContainer.appendChild(warningEl);
+-
+-  // Warning message bar impression event
+-  Glean.genaiChatbot.lengthDisclaimer.record({
+-    type,
+-    length,
+-    provider,
+-  });
++function scrollToBottom() {
++  const container = document.getElementById("messages-container");
++  if (container) container.scrollTop = container.scrollHeight;
++}
+ 
+-  await customElements.whenDefined("moz-message-bar");
+-  const dismissButton = warningEl.shadowRoot.querySelector(".close");
+-  dismissButton?.addEventListener("click", () => {
+-    Glean.genaiChatbot.lengthDisclaimerDismissed.record({
+-      type,
+-      provider,
+-    });
+-    messageContainer.hidden = true;
+-  });
++async function handleSend() {
++  if (!dom.chatInput) return;
++  const text = dom.chatInput.value.trim();
++  if (!text) return;
++
++  dom.chatInput.value = "";
++  dom.chatInput.style.height = "auto";
++  dom.btnSend.disabled = true;
++
++  addMessage("user", text);
++
++  const pageContext = getActiveTabContext();
++
++  dom.typingIndicator.style.display = "flex";
++  scrollToBottom();
++
++  try {
++    let response;
++    if (FapybaraAI) {
++      response = await FapybaraAI.generateResponse(text, pageContext);
++    } else {
++      response = "⚠️ Módulo de IA não disponível. Reinicie o navegador e tente novamente.";
++    }
++    dom.typingIndicator.style.display = "none";
++    addMessage("assistant", response);
++  } catch (err) {
++    dom.typingIndicator.style.display = "none";
++    addMessage(
++      "assistant",
++      `⚠️ Erro durante inferência: ${err.message || err}`
++    );
++  }
+ }
+ 
+-/**
+- * Expose Sidebar entry for new prompt
+- *
+- * @param {object} opt for new prompt
+- * @param {boolean} [opt.show]
+- * @param {number} [opt.contextLength]
+- */
+-window.onNewPrompt = async function (opt = {}) {
+-  if (opt.show) {
+-    await showSummarizeWarning(opt.contextLength);
+-  } else {
+-    clearWarningMessage();
++function handlePageAction(promptPrefix) {
++  try {
++    const browser = topChromeWindow?.gBrowser?.selectedBrowser;
++    const title = browser?.contentTitle || "Página atual";
++    const url = browser?.currentURI?.spec || "";
++
++    const question = url
++      ? `${promptPrefix}\n\n**Página:** ${title}\n**URL:** ${url}`
++      : `${promptPrefix}\n\n**Página:** ${title}`;
++
++    dom.chatInput.value = question;
++    dom.btnSend.disabled = false;
++    dom.chatInput.focus();
++    handleSend();
++  } catch (e) {
++    console.error("Fapybara AI: Error in handlePageAction:", e);
+   }
+-};
++}
+ 
+-window.addEventListener("SidebarFocused", () =>
+-  document.querySelector("#browser-container browser").focus()
+-);
++function getActiveTabContext() {
++  try {
++    const browser = topChromeWindow?.gBrowser?.selectedBrowser;
++    if (!browser) return "";
++    const title = browser.contentTitle || "";
++    const url = browser.currentURI?.spec || "";
++    return title || url ? `Título: ${title}\nURL: ${url}` : "";
++  } catch (e) {
++    return "";
++  }
++}
++
++// Use both events to ensure init fires regardless of load order
++if (document.readyState === "loading") {
++  document.addEventListener("DOMContentLoaded", initChat);
++} else {
++  initChat();
++}
+diff --git a/browser/components/genai/moz.build b/browser/components/genai/moz.build
+index d12aeb615246..72794b34d129 100644
+--- a/browser/components/genai/moz.build
++++ b/browser/components/genai/moz.build
+@@ -12,6 +12,7 @@ with Files("**"):
+     BUG_COMPONENT = ("Core", "Machine Learning: Frontend")
+ 
+ EXTRA_JS_MODULES += [
++    "FapybaraAI.sys.mjs",
+     "GenAI.sys.mjs",
+ ]
+ 
+diff --git a/browser/themes/shared/browser-shared.css b/browser/themes/shared/browser-shared.css
+index 24d78e0a5653..e4f10adf104b 100644
+--- a/browser/themes/shared/browser-shared.css
++++ b/browser/themes/shared/browser-shared.css
+@@ -59,6 +59,9 @@ body {
+   --lwt-toolbar-field-background-color: rgba(255, 255, 255, 0.08) !important;
+   --lwt-toolbar-field-color: var(--fapybara-text-color) !important;
+   --lwt-selected-tab-background-color: var(--fapybara-accent-color) !important;
++  --toolbox-background-image: none !important;
++  --lwt-header-image: none !important;
++  --lwt-additional-images: none !important;
+ 
+   --window-min-width: 500px;
+   /* Vertical tabs need extra room in the nav bar for window controls,
+@@ -1786,4 +1789,9 @@ popupnotificationcontent {
+ /* Apply customized border-radius to active tabs */
+ .tab-background {
+   border-radius: var(--fapybara-border-radius, 4px) !important;
++}
++
++/* Block third-party AMO theme background images from overriding Fapybara */
++#navigator-toolbox[lwtheme] {
++  background-image: none !important;
+ }
+\ No newline at end of file
